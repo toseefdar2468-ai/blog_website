@@ -25,7 +25,7 @@ export default function ContactPage() {
         <p>
           You can also reach me directly via email:
           <span className="ml-1 font-medium text-indigo-300">
-            your-email@example.com
+            toseefdar2468@gmail.com
           </span>
         </p>
       </div>

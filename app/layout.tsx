@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
+import Header from "./components/Header";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -30,32 +31,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className="min-h-full bg-slate-950 text-slate-100">
         <div className="flex min-h-screen flex-col">
           {/* HEADER */}
-          <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-            <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-              <Link href="/" className="flex items-center gap-2">
-                <span className="rounded bg-indigo-500 px-2 py-1 text-xs font-semibold uppercase tracking-wider">
-                  DevCraft
-                </span>
-                <span className="text-lg font-semibold text-slate-100">
-                  Blog
-                </span>
-              </Link>
-              <nav className="flex gap-6 text-sm text-slate-300">
-                <Link href="/blog" className="hover:text-white">
-                  Blog
-                </Link>
-                <Link href="/about" className="hover:text-white">
-                  About
-                </Link>
-                <Link href="/contact" className="hover:text-white">
-                  Contact
-                </Link>
-                <Link href="/privacy-policy" className="hover:text-white">
-                  Privacy
-                </Link>
-              </nav>
-            </div>
-          </header>
+          <Header />
 
           {/* MAIN CONTENT */}
           <main className="flex-1">
