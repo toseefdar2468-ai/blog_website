@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 :root {
+  /* Prevent horizontal scroll caused by small layout shifts */
+  overflow-x: hidden;
+}
+
+:root {
   --background: #ffffff;
   --foreground: #171717;
 }
