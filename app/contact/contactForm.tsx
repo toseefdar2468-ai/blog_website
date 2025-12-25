@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import emailjs from "@emailjs/browser";
+import { toast } from "../../lib/toast";
 
 export default function ContactForm() {
   const [name, setName] = React.useState("");
@@ -15,10 +16,9 @@ export default function ContactForm() {
     setStatus(null);
     setLoading(true);
     try {
-      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!;
-      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!;
-      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!;
-
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
       if (!serviceId || !templateId || !publicKey) {
         setStatus("Email service not configured. See .env.local.example.");
         return;
@@ -32,9 +32,12 @@ export default function ContactForm() {
       setName("");
       setEmail("");
       setMessage("");
+      // show toast
+      toast("Message sent.", "success");
     } catch (err) {
       console.error(err);
       setStatus("Failed to send message. Try again later.");
+      toast("Failed to send message.", "error");
     } finally {
       setLoading(false);
     }

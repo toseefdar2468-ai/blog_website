@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./components/Header";
 import Link from "next/link";
+import Toaster from "./components/Toaster";
 
 export const metadata: Metadata = {
   title: {
@@ -11,13 +12,13 @@ export const metadata: Metadata = {
   },
   description:
     "DevCraft Blog - daily articles on frontend development, Angular, React, JavaScript, and modern web practices.",
-  metadataBase: new URL("https://your-domain.com"), // change after deployment
+  metadataBase: new URL("https://osama-portfolio-jarh.vercel.app"),
   openGraph: {
     title: "DevCraft Blog",
     description:
       "Level up your frontend skills with practical guides, tips, and tutorials for Angular, React, and modern web development.",
     type: "website",
-    url: "https://your-domain.com",
+    url: "https://osama-portfolio-jarh.vercel.app",
   },
 };
 
@@ -52,6 +53,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+          <Toaster />
         </div>
       </body>
     </html>
