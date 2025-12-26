@@ -19,6 +19,9 @@ export default function Footer() {
           <Link href="/blog" className={linkClass("/blog")} aria-current={isActive("/blog") ? "page" : undefined}>
             Blog
           </Link>
+          <Link href="/simple-blog" className={linkClass("/simple-blog")} aria-current={isActive("/simple-blog") ? "page" : undefined}>
+            Simple Blog
+          </Link>
           <Link href="/about" className={linkClass("/about")} aria-current={isActive("/about") ? "page" : undefined}>
             About
           </Link>
