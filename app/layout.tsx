@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Link from "next/link";
 import Toaster from "./components/Toaster";
+import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
   title: {
@@ -39,20 +40,8 @@ export default function RootLayout({
             <div className="mx-auto max-w-5xl px-4 py-8">{children}</div>
           </main>
 
-          {/* FOOTER */}
-          <footer className="border-t border-slate-800 bg-slate-950/80">
-            <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-6 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
-              <p>© {new Date().getFullYear()} DevCraft Blog. All rights reserved.</p>
-              <div className="flex gap-4">
-                <Link href="/privacy-policy" className="hover:text-slate-200">
-                  Privacy Policy
-                </Link>
-                <Link href="/contact" className="hover:text-slate-200">
-                  Contact
-                </Link>
-              </div>
-            </div>
-          </footer>
+          {/* FOOTER (client component for active-route highlighting) */}
+          <Footer />
           <Toaster />
         </div>
       </body>

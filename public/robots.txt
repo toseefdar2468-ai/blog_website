@@ -2,5 +2,4 @@ User-agent: *
 Allow: /
 
 # Sitemap for your site
-Sitemap: https://osama-portfolio-jarh.vercel.app/sitemap.xml
-Host: https://osama-portfolio-jarh.vercel.app
+Sitemap: /sitemap.xml

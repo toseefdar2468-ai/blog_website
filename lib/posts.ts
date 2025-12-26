@@ -48,8 +48,6 @@ export function getAllPosts(): PostMeta[] {
 }
 
 export function getPostBySlug(slug: string): Post {
-  debugger
-  console.log('slug in posts.ts ->',slug)
   if (!slug) {
     throw new Error("getPostBySlug: slug is required");
   }
