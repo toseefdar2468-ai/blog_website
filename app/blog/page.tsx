@@ -11,7 +11,7 @@ export default function BlogIndexPage() {
   const posts = getAllPosts();
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6">
+    <section className="mx-auto space-y-6">
       <header className="space-y-2 border-b border-slate-800 pb-4">
         <p className="text-xs uppercase tracking-wide text-indigo-300">
           Frontend Development

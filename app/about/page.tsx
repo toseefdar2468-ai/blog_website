@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="mx-auto space-y-4">
       <h1 className="text-2xl font-bold text-slate-50">About DevCraft Blog</h1>
       <p className="text-sm text-slate-300">
         DevCraft Blog is a focused learning resource for frontend developers who

@@ -9,6 +9,7 @@ export type PostMeta = {
   title: string;
   date: string;
   description: string;
+  image?: string;
   slug: string;
 };
 
@@ -35,11 +36,13 @@ export function getAllPosts(): PostMeta[] {
       slugFromFrontmatter ?? fileName.replace(/\.md$/, ""); // fallback to filename
 
     const { title, date, description } = data as any;
+    const image = (data as any).image as string | undefined;
 
     return {
       title,
       date,
       description,
+      image,
       slug,
     };
   });
@@ -65,11 +68,13 @@ export function getPostBySlug(slug: string): Post {
 
     if (derivedSlug === slug) {
       const { title, date, description } = data as any;
+      const image = (data as any).image as string | undefined;
 
       return {
         title,
         date,
         description,
+        image,
         slug: derivedSlug,
         content,
       };

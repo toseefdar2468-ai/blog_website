@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-4 text-sm text-slate-300">
+    <div className="mx-auto space-y-4 text-sm text-slate-300">
       <h1 className="text-2xl font-bold text-slate-50">Privacy Policy</h1>
       <p>
         This Privacy Policy describes how this website (&quot;DevCraft
