@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff2d55"/>
+      <stop offset="100%" stop-color="#dd0031"/>
+    </linearGradient>
+
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 0.35 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#94a3b8" stroke-opacity="0.12" stroke-width="1"/>
+    </pattern>
+
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#60a5fa" fill-opacity="0.95"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#grid)" opacity="0.6"/>
+
+  <!-- Ambient blobs -->
+  <circle cx="180" cy="120" r="140" fill="url(#accent)" opacity="0.18" filter="url(#softGlow)"/>
+  <circle cx="1040" cy="520" r="190" fill="url(#teal)" opacity="0.14" filter="url(#softGlow)"/>
+  <circle cx="980" cy="120" r="90" fill="#a78bfa" opacity="0.10" filter="url(#softGlow)"/>
+
+  <!-- Badge -->
+  <g transform="translate(64,54)" filter="url(#shadow)">
+    <rect x="0" y="0" rx="16" ry="16" width="132" height="56" fill="#0b1020" stroke="#334155" stroke-opacity="0.7"/>
+    <path d="M28 42 L40 14 L66 8 L92 14 L104 42 L66 52 Z" fill="url(#accent)"/>
+    <text x="66" y="38" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="18" font-weight="800" fill="#ffffff">ng</text>
+  </g>
+
+  <!-- Title -->
+  <g transform="translate(64,150)">
+    <text x="0" y="0" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="54" font-weight="900" fill="#e5e7eb" letter-spacing="-0.5">Angular Component</text>
+    <text x="0" y="36" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="20" font-weight="600" fill="#cbd5e1" opacity="0.95">
+      Template • Class • Styles • Inputs/Outputs
+    </text>
+  </g>
+
+  <!-- Code card (left) -->
+  <g transform="translate(64,250)" filter="url(#shadow)">
+    <rect x="0" y="0" rx="22" ry="22" width="560" height="320" fill="#0b1020" stroke="#334155" stroke-opacity="0.7"/>
+    <rect x="0" y="0" rx="22" ry="22" width="560" height="54" fill="#0a0f1e" stroke="#334155" stroke-opacity="0.0"/>
+    <circle cx="28" cy="27" r="6" fill="#ef4444"/>
+    <circle cx="50" cy="27" r="6" fill="#f59e0b"/>
+    <circle cx="72" cy="27" r="6" fill="#22c55e"/>
+
+    <!-- Code text -->
+    <g transform="translate(28,88)" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="16">
+      <text x="0" y="0" fill="#93c5fd">@Component</text>
+      <text x="110" y="0" fill="#e5e7eb">({</text>
+
+      <text x="24" y="30" fill="#e5e7eb">selector:</text>
+      <text x="132" y="30" fill="#fca5a5">'app-card'</text><text x="230" y="30" fill="#e5e7eb">,</text>
+
+      <text x="24" y="60" fill="#e5e7eb">templateUrl:</text>
+      <text x="156" y="60" fill="#a7f3d0">'./card.html'</text><text x="310" y="60" fill="#e5e7eb">,</text>
+
+      <text x="24" y="90" fill="#e5e7eb">styleUrls:</text>
+      <text x="156" y="90" fill="#a7f3d0">['./card.css']</text><text x="310" y="90" fill="#e5e7eb">,</text>
+
+      <text x="0" y="120" fill="#e5e7eb">})</text>
+
+      <text x="0" y="160" fill="#e5e7eb">export class</text>
+      <text x="150" y="160" fill="#fef08a">CardComponent</text>
+      <text x="290" y="160" fill="#e5e7eb">{</text>
+
+      <text x="24" y="190" fill="#93c5fd">@Input</text><text x="88" y="190" fill="#e5e7eb">()</text>
+      <text x="120" y="190" fill="#e5e7eb">title</text><text x="170" y="190" fill="#e5e7eb">=</text>
+      <text x="190" y="190" fill="#fca5a5">'Hello'</text><text x="260" y="190" fill="#e5e7eb">;</text>
+
+      <text x="24" y="220" fill="#93c5fd">@Output</text><text x="104" y="220" fill="#e5e7eb">()</text>
+      <text x="136" y="220" fill="#e5e7eb">saved</text><text x="196" y="220" fill="#e5e7eb">=</text>
+      <text x="216" y="220" fill="#e5e7eb">new</text>
+      <text x="254" y="220" fill="#fef08a">EventEmitter</text><text x="376" y="220" fill="#e5e7eb">&lt;void&gt;();</text>
+
+      <text x="0" y="252" fill="#e5e7eb">}</text>
+    </g>
+  </g>
+
+  <!-- Blocks (right) -->
+  <g transform="translate(680,250)" filter="url(#shadow)">
+    <rect x="0" y="0" rx="22" ry="22" width="456" height="320" fill="#0b1020" stroke="#334155" stroke-opacity="0.7"/>
+
+    <!-- Template block -->
+    <g transform="translate(26,26)">
+      <rect x="0" y="0" rx="18" ry="18" width="404" height="84" fill="#0a1326" stroke="#1d4ed8" stroke-opacity="0.55"/>
+      <text x="20" y="34" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="18" font-weight="800" fill="#bfdbfe">Template</text>
+      <text x="20" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="14" fill="#e5e7eb" opacity="0.95">
+        &lt;app-card [title]="..."&gt;&lt;/app-card&gt;
+      </text>
+    </g>
+
+    <!-- Styles block -->
+    <g transform="translate(26,124)">
+      <rect x="0" y="0" rx="18" ry="18" width="404" height="84" fill="#0b1a18" stroke="#14b8a6" stroke-opacity="0.55"/>
+      <text x="20" y="34" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="18" font-weight="800" fill="#99f6e4">Styles</text>
+      <text x="20" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="14" fill="#e5e7eb" opacity="0.95">
+        .card &#123; display: grid; gap: 12px; &#125;
+      </text>
+    </g>
+
+    <!-- Class block -->
+    <g transform="translate(26,222)">
+      <rect x="0" y="0" rx="18" ry="18" width="404" height="84" fill="#17111f" stroke="#a78bfa" stroke-opacity="0.55"/>
+      <text x="20" y="34" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="18" font-weight="800" fill="#ddd6fe">Class</text>
+      <text x="20" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="14" fill="#e5e7eb" opacity="0.95">
+        state, events, DI, lifecycle hooks
+      </text>
+    </g>
+  </g>
+
+  <!-- Connectors -->
+  <path d="M624 380 C 660 380, 660 306, 680 306" fill="none" stroke="#60a5fa" stroke-width="3" stroke-opacity="0.9" marker-end="url(#arrow)"/>
+  <path d="M624 430 C 660 430, 660 404, 680 404" fill="none" stroke="#34d399" stroke-width="3" stroke-opacity="0.85" marker-end="url(#arrow)"/>
+  <path d="M624 486 C 660 486, 660 506, 680 506" fill="none" stroke="#c4b5fd" stroke-width="3" stroke-opacity="0.85" marker-end="url(#arrow)"/>
+
+  <!-- Footer note -->
+  <text x="64" y="606" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Arial" font-size="14" fill="#94a3b8" opacity="0.85">
+    Visual cover image — feel free to edit text to match your article title.
+  </text>
+</svg>

@@ -29,7 +29,7 @@ export default async function BlogPostPage({ params }: any) {
           <img
             src={post.image}
             alt={post.title}
-            className="w-full h-[360px] sm:h-[420px] object-cover rounded-md"
+            className="w-full h-[360px] sm:h-[420px] object-contain rounded-md"
           />
         </div>
       ) : null}
