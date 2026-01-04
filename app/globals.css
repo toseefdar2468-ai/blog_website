@@ -36,8 +36,11 @@ main {
 
 article h1,
 article h2,
-article h3 {
-  @apply font-semibold text-slate-50;
+article h3,
+article h4 {
+  @apply font-semibold text-slate-50 bg-slate-900/60 px-2 py-1 rounded-md;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 article p {

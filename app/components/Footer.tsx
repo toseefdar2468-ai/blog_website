@@ -13,14 +13,11 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-slate-800 bg-slate-950/80">
-      <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-6 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
-        <p>© {new Date().getFullYear()} DevCraft Blog. All rights reserved.</p>
-        <div className="flex gap-4">
+      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
+        <p className="text-slate-300">Ac {new Date().getFullYear()} DevCraft Blog. All rights reserved.</p>
+        <div className="grid grid-cols-2 justify-items-start gap-x-6 gap-y-3 sm:grid-cols-3 md:flex md:flex-row md:gap-4">
           <Link href="/blog" className={linkClass("/blog")} aria-current={isActive("/blog") ? "page" : undefined}>
             Blog
-          </Link>
-          <Link href="/simple-blog" className={linkClass("/simple-blog")} aria-current={isActive("/simple-blog") ? "page" : undefined}>
-            Simple Blog
           </Link>
           <Link href="/about" className={linkClass("/about")} aria-current={isActive("/about") ? "page" : undefined}>
             About
@@ -36,3 +33,6 @@ export default function Footer() {
     </footer>
   );
 }
+
+
+
