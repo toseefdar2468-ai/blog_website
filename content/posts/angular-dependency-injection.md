@@ -13,15 +13,15 @@ This is where Angular Services and Dependency Injection (DI) come in.
 
 In this article, you’ll learn:
 
-What Angular services are
+- What Angular services are
 
-Why services are important
+- Why services are important
 
-How Dependency Injection works in Angular
+- How Dependency Injection works in Angular
 
-How to create and use a service step by step
+- How to create and use a service step by step
 
-Best practices for writing services
+- Best practices for writing services
 
 What Is an Angular Service?
 
@@ -29,13 +29,13 @@ An Angular service is a TypeScript class that contains business logic, shared da
 
 Services are commonly used for:
 
-Fetching data from APIs
+- Fetching data from APIs
 
-Sharing data between components
+- Sharing data between components
 
-Handling application logic
+- Handling application logic
 
-Logging and authentication
+- Logging and authentication
 
 👉 The main goal of services is separation of concerns — keeping components focused on UI and services focused on logic.
 
@@ -43,21 +43,21 @@ Why Use Services Instead of Components?
 
 Putting all logic inside components leads to:
 
-Large and hard-to-maintain components
+- Large and hard-to-maintain components
 
-Code duplication
+- Code duplication
 
-Poor reusability
+- Poor reusability
 
 Using services helps you:
 
-Keep components clean and readable
+- Keep components clean and readable
 
-Reuse logic across the app
+- Reuse logic across the app
 
-Make testing easier
+- Make testing easier
 
-Improve scalability
+- Improve scalability
 
 What Is Dependency Injection in Angular?
 
@@ -65,19 +65,19 @@ Dependency Injection (DI) is a design pattern where a class receives its depende
 
 In Angular:
 
-Services are dependencies
+- Services are dependencies
 
-Components request services
+- Components request services
 
-Angular’s DI system provides them automatically
+- Angular’s DI system provides them automatically
 
 This makes your code:
 
-Loosely coupled
+- Loosely coupled
 
-Easier to test
+- Easier to test
 
-More maintainable
+- More maintainable
 
 Creating an Angular Service
 
@@ -188,6 +188,76 @@ Purpose	UI logic	Business logic
 Reusability	Limited	High
 State Sharing	Not ideal	Recommended
 Testing	Moderate	Easy
+Designing Better Services
+
+Services work best when they focus on a single responsibility. A data service should handle data access, while a UI service might manage toasts or dialogs. When a service grows too large, split it into smaller units.
+
+Guidelines:
+
+- Keep API calls in a dedicated data or repository service
+- Keep formatting logic in utility services
+- Avoid storing UI state inside data services
+
+This separation keeps your app modular and easier to maintain.
+
+Testing Services and DI
+
+Services are simple to test because they are plain classes. In Angular, you can use TestBed to inject a service and test its methods directly.
+
+Testing tips:
+
+- Mock HttpClient to avoid real network calls
+- Test success and error paths
+- Keep service methods small and predictable
+
+Because services are independent, tests are fast and reliable.
+
+Common DI Mistakes
+
+Beginners often hit the same DI issues:
+
+- Forgetting to add a provider when a service is not providedIn root
+- Importing a service from the wrong path
+- Creating circular dependencies between services
+
+When a DI error appears, check the provider scope and make sure the service is in the correct module or component providers list.
+
+Provider Configuration Tips
+
+Angular lets you configure providers with different strategies. The most common is a class provider, but you can also use a value or factory.
+
+Examples:
+
+- Use `useValue` for simple constants
+- Use `useFactory` when setup needs logic or config
+- Use `useExisting` to reuse another provider
+
+These options help you integrate third party code or environment specific behavior.
+
+Injection Tokens and Interfaces
+
+TypeScript interfaces do not exist at runtime, so Angular cannot inject them directly. Use `InjectionToken` when you want to inject an abstract value.
+
+When it helps:
+
+- Config objects
+- Feature flags
+- Adapter style services
+
+Tokens make your design more flexible and easier to swap in tests.
+
+Hierarchical Injectors
+
+Angular has a hierarchy of injectors. A service provided in a component is different from one provided in a module or at the root. This lets you scope behavior where you need it.
+
+Examples:
+
+- Provide a service in a feature module to isolate it
+- Provide in a component to create a fresh instance per component
+- Provide at root for a singleton across the entire app
+
+Understanding this hierarchy helps you avoid unexpected shared state.
+
 Conclusion
 
 Angular services and dependency injection are core building blocks of scalable Angular applications.

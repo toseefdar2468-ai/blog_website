@@ -5,6 +5,9 @@ description: "Learn what Angular components are and how they work. This beginner
 slug: "angular-components-beginners-guide"
 image: "/images/angular-component-hero.svg"
 ---
+
+Angular Components Explained for Beginners
+
 If you have already read my introduction to Angular, you know that Angular is a framework for building single‑page applications in a structured way. The next concept you should master is the component—because in Angular, almost everything you see on the screen is built from components.
 
 In this article, I’ll explain what Angular components are in simple language, what files a component contains, how components talk to each other, and a few best practices that will save you time when your project grows.
@@ -13,11 +16,11 @@ What Is a Component in Angular?
 
 A component is a small, reusable piece of your user interface (UI). You can think of it like a “section” of a web page with its own:
 
-HTML (what users see)
+- HTML (what users see)
 
-TypeScript logic (how it behaves)
+- TypeScript logic (how it behaves)
 
-CSS styling (how it looks)
+- CSS styling (how it looks)
 
 Instead of writing one huge HTML file and one huge JavaScript file, Angular encourages you to break the UI into smaller pieces.
 
@@ -25,15 +28,15 @@ Real-life example
 
 A dashboard page may be divided into components like:
 
-HeaderComponent
+- HeaderComponent
 
-SidebarComponent
+- SidebarComponent
 
-StatsCardComponent
+- StatsCardComponent
 
-UserTableComponent
+- UserTableComponent
 
-FooterComponent
+- FooterComponent
 
 Each component does one job. When a bug appears, you can go directly to the component responsible for that part of the UI.
 
@@ -43,33 +46,25 @@ Components are not just a “nice to have.” They are a big reason Angular work
 
 Components help because:
 
-Reusability
+- Reusability: Build one button component and reuse it in many pages.
 
-Build one button component and reuse it in many pages.
+- Maintainability: Smaller files are easier to read, test, and update.
 
-Maintainability
+- Teamwork: Different developers can work on different components without touching the same file.
 
-Smaller files are easier to read, test, and update.
-
-Teamwork
-
-Different developers can work on different components without touching the same file.
-
-Scalability
-
-As your project grows, you keep a clean structure instead of a messy codebase.
+- Scalability: As your project grows, you keep a clean structure instead of a messy codebase.
 
 The Basic Structure of an Angular Component
 
 When you create a component in Angular, you usually get these files:
 
-example.component.ts (TypeScript logic)
+- example.component.ts (TypeScript logic)
 
-example.component.html (template)
+- example.component.html (template)
 
-example.component.css or .scss (styles)
+- example.component.css or .scss (styles)
 
-example.component.spec.ts (tests, optional for beginners)
+- example.component.spec.ts (tests, optional for beginners)
 
 The component’s TypeScript file connects everything together.
 
@@ -216,11 +211,11 @@ Lifecycle hooks are methods you can use when you need to run logic at the right 
 
 Common ones:
 
-ngOnInit() — runs once when the component starts
+- ngOnInit() — runs once when the component starts
 
-ngOnChanges() — runs when input values change
+- ngOnChanges() — runs when input values change
 
-ngOnDestroy() — runs when the component is removed
+- ngOnDestroy() — runs when the component is removed
 
 For beginners, the most important one is usually ngOnInit() because you often load data there.
 
@@ -238,21 +233,21 @@ Components should handle UI. Business logic and API calls are often better insid
 
 3) Use meaningful names
 
-UserListComponent is clearer than ListComponent
+- UserListComponent is clearer than ListComponent
 
-ProductDetailsComponent is clearer than DetailsComponent
+- ProductDetailsComponent is clearer than DetailsComponent
 
 4) Create a consistent folder structure
 
 A simple structure can be:
 
-components/ (UI pieces)
+- components/ (UI pieces)
 
-pages/ (full screens)
+- pages/ (full screens)
 
-services/ (API + logic)
+- services/ (API + logic)
 
-models/ (interfaces/types)
+- models/ (interfaces/types)
 
 5) Avoid “everything in one file”
 
@@ -262,13 +257,13 @@ Common Beginner Mistakes With Components
 
 If you’re learning Angular, these mistakes are normal:
 
-Putting too much logic inside the component instead of using services
+- Putting too much logic inside the component instead of using services
 
-Forgetting to declare or import a component in the correct module (or routing setup)
+- Forgetting to declare or import a component in the correct module (or routing setup)
 
-Creating very large components instead of splitting them
+- Creating very large components instead of splitting them
 
-Not understanding @Input() and @Output(), leading to messy communication
+- Not understanding @Input() and @Output(), leading to messy communication
 
 The good part is: once you recognize these patterns, your code improves quickly.
 
