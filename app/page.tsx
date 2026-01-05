@@ -21,7 +21,7 @@ export default function HomePage() {
           <p className="text-sm text-slate-300 md:text-base">
             DevCraft Blog is a focused resource for developers who want to grow
             in Angular, React, Next.js, TypeScript, and modern UI development.
-            No fluff—just clear, actionable content.
+            No fluff--just clear, actionable content.
           </p>
           <div className="flex gap-3">
             <Link
@@ -43,11 +43,11 @@ export default function HomePage() {
             What you&apos;ll learn
           </h2>
           <ul className="space-y-2 text-sm text-slate-200">
-            <li>• Modern Angular patterns and best practices</li>
-            <li>• Building production-ready apps with Next.js</li>
-            <li>• UI/UX tips to make your interfaces stand out</li>
-            <li>• Real-world examples of API integration</li>
-            <li>• Practical guides to improve your frontend workflow</li>
+            <li>- Modern Angular patterns and best practices</li>
+            <li>- Building production-ready apps with Next.js</li>
+            <li>- UI/UX tips to make your interfaces stand out</li>
+            <li>- Real-world examples of API integration</li>
+            <li>- Practical guides to improve your frontend workflow</li>
           </ul>
         </div>
       </section>
@@ -85,7 +85,7 @@ export default function HomePage() {
                   href={`/blog/${post.slug}`}
                   className="text-xs font-medium text-indigo-400 hover:text-indigo-300"
                 >
-                  Read article →
+                  Read article {"->"}
                 </Link>
               </div>
             </article>

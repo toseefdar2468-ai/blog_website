@@ -2,9 +2,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./components/Header";
-import Link from "next/link";
 import Toaster from "./components/Toaster";
 import Footer from "./components/Footer";
+import { getSiteUrl } from "@/lib/site";
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -13,13 +15,13 @@ export const metadata: Metadata = {
   },
   description:
     "DevCraft Blog - daily articles on frontend development, Angular, React, JavaScript, and modern web practices.",
-  metadataBase: new URL("https://osama-portfolio-jarh.vercel.app"),
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: "DevCraft Blog",
     description:
       "Level up your frontend skills with practical guides, tips, and tutorials for Angular, React, and modern web development.",
     type: "website",
-    url: "https://osama-portfolio-jarh.vercel.app",
+    url: siteUrl,
   },
 };
 

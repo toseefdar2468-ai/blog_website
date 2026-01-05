@@ -51,7 +51,7 @@ export default function BackToTop() {
       className="fixed bottom-6 right-6 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-900/80 text-slate-100 shadow-lg shadow-slate-950/40 transition hover:-translate-y-1 hover:border-slate-500 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/70"
     >
       <span aria-hidden="true" className="text-lg font-semibold leading-none">
-        ↑
+        ^
       </span>
     </button>
   );

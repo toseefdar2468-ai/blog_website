@@ -1,13 +1,43 @@
 // app/blog/[slug]/page.tsx
+import type { Metadata } from "next";
 import { getAllPosts, getPostBySlug } from "@/lib/posts";
 import { markdownToHtml } from "@/lib/markdownToHtml";
 import BackToTop from "@/app/components/BackToTop";
+import { getSiteUrl } from "@/lib/site";
 export function generateStaticParams() {
   const posts = getAllPosts();
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export default async function BlogPostPage({ params }: any) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
+  const siteUrl = getSiteUrl();
+  const url = `${siteUrl}/blog/${post.slug}`;
+
+  return {
+    title: post.title,
+    description: post.description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: "article",
+      url,
+      images: post.image ? [{ url: `${siteUrl}${post.image}` }] : undefined,
+    },
+  };
+}
+
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
   const htmlContent = await markdownToHtml(post.content);
