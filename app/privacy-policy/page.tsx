@@ -40,10 +40,16 @@ export default function PrivacyPolicyPage() {
       </h2>
       <p>
         This site may use third-party analytics services (such as Google
-        Analytics) to understand traffic and usage patterns. In the future, we
-        may display third-party advertising (such as Google AdSense). These
-        providers may use cookies or similar technologies to serve relevant ads
-        based on your visits to this and other websites.
+        Analytics) to understand traffic and usage patterns. We also display
+        third-party advertising (Google AdSense). These providers may use
+        cookies or similar technologies to serve ads based on your visits to
+        this and other websites.
+      </p>
+      <p>
+        Google uses cookies to serve ads on this site. You can opt out of
+        personalized advertising by visiting https://adssettings.google.com or
+        www.aboutads.info. If you are located in the EEA, UK, or Switzerland,
+        you will be asked to consent to personalized ads where required.
       </p>
 
       <h2 className="mt-4 text-lg font-semibold text-slate-50">

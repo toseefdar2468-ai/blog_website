@@ -59,6 +59,9 @@ export default function Header() {
           <Link href="/privacy-policy" className={isActive("/privacy-policy") ? "text-white font-semibold" : "hover:text-white"}>
             Privacy
           </Link>
+          <Link href="/terms" className={isActive("/terms") ? "text-white font-semibold" : "hover:text-white"}>
+            Terms
+          </Link>
         </nav>
 
         <button
@@ -144,6 +147,13 @@ export default function Header() {
               onClick={() => setOpen(false)}
             >
               Privacy
+            </Link>
+            <Link
+              href="/terms"
+              className={`block rounded-md px-3 py-3 text-base transition-colors ${isActive("/terms") ? "bg-white/8 text-white font-semibold" : "text-white/90 hover:bg-white/6"}`}
+              onClick={() => setOpen(false)}
+            >
+              Terms
             </Link>
           </nav>
         </aside>

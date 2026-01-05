@@ -19,7 +19,7 @@ export default function AboutPage() {
       </p>
       <p className="text-sm text-slate-300">
         My background is in frontend engineering, with experience in Angular,
-        React, and Next.js. I&apos;ve faced the same challenges you have—
+        React, and Next.js. I&apos;ve faced the same challenges you have--
         confusing documentation, scattered tutorials, and outdated examples.
         This blog is my way of sharing the lessons, patterns, and workflows
         that actually work.

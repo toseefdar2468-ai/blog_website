@@ -18,7 +18,6 @@ export default function ContactPage() {
         </p>
       </div>
 
-      {/* 👇 This is now a Client Component */}
       <ContactForm />
 
       <div className="space-y-1 text-sm text-slate-300">
