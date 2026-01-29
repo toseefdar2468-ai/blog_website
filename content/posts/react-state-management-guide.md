@@ -1,166 +1,205 @@
----
-title: "React State Management: From Local State to Global Stores"
-date: "2026-01-03"
-description: "Learn how to manage state in React, when to lift state, and when to use Context, reducers, or external stores."
+﻿---
+title: "React State Management Guide"
+date: "2025-12-31"
+description: "A practical guide to React state management, from useState to context and external stores."
 slug: "react-state-management-guide"
 image: "/images/react-state-management.png"
 ---
 
-React State Management: From Local State to Global Stores
+# React State Management Guide
 
-State management is one of the most important decisions in a React app. Good state design keeps your UI predictable and easy to debug. Poor state design leads to tangled components and bugs that are hard to trace.
+State management is not a library problem. It is a clarity problem. The simpler the state model, the easier the app is to maintain.
 
-In this guide you will learn:
+This guide shows how I decide when to keep state local, when to lift it, and when to use a store.
 
-- The difference between local and global state
-- When to lift state up
-- How Context and useReducer work together
-- When to consider external libraries
-- A practical decision checklist
+## Start with local state
 
-Start With Local State
+```tsx
+import { useState } from "react";
 
-Most state should be local to the component that owns it. If only one component needs the data, keep it there. This keeps your app simple and avoids unnecessary re renders.
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <button onClick={() => setCount((c) => c + 1)}>
+      Clicked {count} times
+    </button>
+  );
+}
+```
 
-Examples of local state:
+Local state is the simplest and most reliable option.
 
-- Input values for a single form
-- Toggle state for a modal
-- UI tabs or filters inside a component
+## Lift state when siblings need it
 
-When to Lift State Up
+```tsx
+function Dashboard() {
+  const [filters, setFilters] = useState({ status: "all" });
+  return (
+    <>
+      <FilterPanel filters={filters} onChange={setFilters} />
+      <Results filters={filters} />
+    </>
+  );
+}
+```
 
-If two sibling components need the same data, move the state to their nearest common parent. This is called lifting state up.
+This keeps the shared state in the closest common parent.
 
-For example:
+## Context for app wide settings
 
-- A search box and results list should share the same query
-- A cart icon and cart drawer should share the same cart items
+```tsx
+const ThemeContext = createContext({ theme: "dark" });
 
-Lifting state keeps a single source of truth and avoids out of sync UI.
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState("dark");
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+```
 
-Derived State vs Stored State
+Context is great for UI settings, authentication status, or feature flags.
 
-A common mistake is storing values that can be calculated. If a value can be derived from other state, calculate it during render instead of storing it.
+## Persisting state
 
-Example:
+If a state should survive refreshes (like theme or language), store it in local storage and hydrate on load. Keep the persisted state small and stable.
 
-- Store a list of items
-- Derive the count with `items.length`
+## Form state is its own category
 
-This reduces bugs and makes state updates simpler.
+Forms often need validation, dirty tracking, and error states. Treat form state separately from app state and avoid mixing it with global stores.
 
-Using Context for Shared State
+## Anti patterns to avoid
 
-Context lets you pass data through the component tree without drilling props at every level. It is great for app wide data like theme, auth user, or language.
+- Storing derived values that can be computed
+- Using a global store for simple local UI state
+- Mutating objects instead of replacing them
 
-Good use cases:
+## A simple store shape example
 
-- Theme settings
-- Authenticated user profile
-- Feature flags
+Even if you use a store, keep the shape small and clear:
 
-Be careful: Context updates re render all consumers. Keep context values small and stable.
+```ts
+type Store = {
+  user: User | null;
+  notifications: Notification[];
+  ui: { theme: "light" | "dark" };
+};
+```
 
-Using useReducer for Complex Logic
+This keeps responsibilities separated and prevents unrelated state from getting tangled.
 
-useReducer is useful when state transitions are more complex than simple setState calls. It gives you a reducer function and actions, similar to Redux but built in.
+## Normalizing complex data
 
-Benefits:
+If you store lists of objects, normalize them into a map by id. This makes updates faster and prevents duplicate data.
 
-- Clear state transitions
-- Easier to test logic
-- Works well with Context for global state
+## Debugging state issues
 
-A typical pattern is to combine Context and useReducer to build a small global store without external libraries.
+When state feels wrong, log the state transitions and check where updates happen. Many bugs come from accidental mutations or from multiple sources trying to update the same state.
 
-When to Use External Libraries
+## Splitting state by domain
 
-Libraries like Redux, Zustand, or Jotai can be helpful when your app is large or your state is deeply shared.
+Keep unrelated state in separate slices. For example, authentication state should not live next to UI preferences. This makes updates predictable and reduces the chance of accidental coupling.
 
-Consider an external store when:
+## State transition logging
 
-- Many unrelated components need the same data
-- State updates are frequent and complex
-- You need dev tools and time travel debugging
-- Multiple teams work on the same app
+When debugging, log actions and state snapshots. Even a simple console log of the previous and next state can reveal where things go wrong.
 
-If your app is small or medium, you may not need any external store at all.
+## Keep state updates explicit
 
-Avoid the "Global Store for Everything" Trap
+When multiple components can update the same state, centralize the update logic. It reduces bugs and makes it easier to trace changes in the UI.
 
-Global stores are powerful but easy to abuse. If every piece of state goes into a global store, you lose local clarity and introduce unnecessary coupling.
+Colocating state with the component that owns it is still the simplest and most reliable strategy.
+If you can keep state local, you reduce the mental overhead for everyone on the team.
+Prefer explicit actions and avoid hidden side effects in state updates.
+Clear state flow makes bugs easier to track and fix.
 
-A better approach:
+## When a store makes sense
 
-- Keep UI state local
-- Share only the data that is truly global
-- Keep derived data out of the store when possible
+Use a store when:
 
-Practical Example Strategy
+- Many distant components need the same state
+- State changes are frequent or complex
+- You need devtools or time travel debugging
 
-A simple strategy for many apps:
+## Modeling state the simple way
 
-1) Start with local state in components
-2) Lift state up when two siblings need it
-3) Use Context for cross app needs like auth or theme
-4) Use useReducer when updates become complex
-5) Add an external store only if you hit real limits
+I try to model state based on user intent, not component structure. For example, instead of storing five separate booleans for a modal, store a single `activeModal` string.
 
-Common Mistakes
+```tsx
+const [activeModal, setActiveModal] = useState<null | "login" | "invite">(null);
+```
 
-- Storing derived values in state
-- Using Context for rapidly changing data
-- Adding Redux too early without a clear need
-- Passing giant objects through context without memoization
+This avoids conflicting states and makes the UI easier to reason about.
 
-A State Management Checklist
+## Client state vs server state
 
-- Is the state used by one component or many?
-- Can it be derived instead of stored?
-- Will updates be frequent or complex?
-- Do you need dev tools or persistence?
+Not all state is the same. Local UI state (like toggles) belongs in React state. Server state (data from APIs) should be treated differently because it can be cached and refetched.
 
-State Shape and Normalization
+For server state, a data fetching library can simplify caching and retries. For UI state, simple React state is often enough.
 
-How you shape state affects how easy it is to update. Flat structures are usually easier to reason about than deeply nested trees. When you store large lists, keep them normalized so updates are small and predictable.
+## Reducer pattern for complex updates
 
-Practical tips:
+When state changes are more than a couple of lines, I switch to `useReducer` because it makes updates explicit.
 
-- Store items by id in a dictionary and keep a separate list of ids
-- Avoid deeply nested objects when updates touch only one field
-- Keep UI state separate from server data to avoid mixing concerns
+```tsx
+function reducer(state, action) {
+  switch (action.type) {
+    case "add":
+      return { ...state, items: [...state.items, action.item] };
+    case "remove":
+      return { ...state, items: state.items.filter((i) => i.id !== action.id) };
+    default:
+      return state;
+  }
+}
+```
 
-This approach reduces the chance of accidental mutations and makes updates simpler to test.
+## Avoid derived state bugs
 
-Persisting State Safely
+Derived state is values that can be computed from other state. If you store it separately, it can get out of sync. Prefer computing derived values on render or in a memo.
 
-Some state should survive page reloads. Common examples are theme selection, auth tokens, or draft forms. When you persist state, treat it as part of your data flow and make it explicit.
+```tsx
+const completed = items.filter((i) => i.done).length;
+```
 
-Good patterns:
+## Context performance tips
 
-- Save small preferences in localStorage
-- Use sessionStorage for temporary data like a wizard flow
-- Rehydrate state in a single place at app start
+Context re renders every consumer when the value changes. If the value changes often, split it into smaller contexts or memoize the value.
 
-Avoid persisting sensitive data in the browser unless you have a clear reason and proper security measures.
+```tsx
+const value = useMemo(() => ({ theme, setTheme }), [theme]);
+```
 
-Testing State Logic
+## Practical checklist
 
-State logic is easiest to test when it lives outside the component. Reducers and small utility functions are perfect units for tests.
+- Keep state as local as possible
+- Lift state only when multiple children need it
+- Use a reducer for complex updates
+- Choose a store only when you need it
 
-Simple test ideas:
+## Common mistakes
 
-- Given a state and action, the reducer returns the expected new state
-- Derived selectors return correct values for sample data
-- Context providers supply default values correctly
+- Putting everything in a global store too early
+- Using context for high frequency updates
+- Mutating objects in state instead of creating new copies
 
-Testing these pieces keeps your UI clean and your state transitions predictable.
+## Related reading
 
-State Co location
+- [React Hooks Mental Model](/blog/react-hooks-mental-model)
+- [React Performance Optimization](/blog/react-performance-optimization)
+- [TypeScript UI Patterns](/blog/typescript-ui-patterns)
 
-Keep state as close as possible to the component that uses it. Moving state up too early makes components harder to reuse and increases re renders. If only one component needs a value, keep it local until a real sharing need appears.
+## Last updated
 
-Conclusion
+2026-01-22
 
-React gives you many ways to manage state. The best choice depends on your app size, team, and complexity. Start simple, keep state local, and scale up only when necessary. A clear state strategy makes your UI easier to build and much easier to maintain.
+## Sources
+
+- https://react.dev/learn/state-a-components-memory
+- https://react.dev/learn/sharing-state-between-components
+
+## Author
+
+I am Toseef, a frontend engineer who builds Angular, React, and Next.js apps for real products. I write practical guides based on work experience and common team pitfalls. If you want to collaborate, visit [About](/about) or [Contact](/contact).

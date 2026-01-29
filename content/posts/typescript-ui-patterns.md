@@ -1,287 +1,284 @@
----
-title: "TypeScript Patterns for Reliable UI Code"
-date: "2026-01-06"
-description: "Practical TypeScript patterns that keep UI code safe, readable, and easy to refactor."
+﻿---
+title: "TypeScript UI Patterns"
+date: "2026-01-10"
+description: "Practical TypeScript patterns for building safer, cleaner UI components."
 slug: "typescript-ui-patterns"
 image: "/images/typescript-patterns.png"
 ---
 
-TypeScript Patterns for Reliable UI Code
+# TypeScript UI Patterns
 
-TypeScript is most valuable when it models the real shapes of data and the real states of your UI. In frontend work, bugs often show up at the boundaries: API responses, form input, and conditional rendering. The patterns below add guardrails without making your code heavy.
+TypeScript is not just about avoiding type errors. It is a design tool that helps you build clearer, safer UI components. When types encode your intent, components become easier to use and harder to misuse.
 
-In this guide you will learn:
+This guide covers patterns I rely on in production UI work.
 
-- How to model UI state with discriminated unions
-- How to keep API data trustworthy at the boundary
-- When to use `unknown`, `never`, and `as const`
-- How to make components and hooks safer
-- How to keep types maintainable as the app grows
+## 1) Discriminated unions for variants
 
-Start With Real Data, Not Hopes
+When a component has multiple modes, a discriminated union keeps props consistent.
 
-Do not assume an API response is correct just because the request succeeded. Parse or validate the response once, at the boundary, and then let the rest of the app rely on a safe type. This is where `unknown` is useful.
+```ts
+type ButtonProps =
+  | { variant: "primary"; href?: never }
+  | { variant: "link"; href: string };
+```
 
-A simple pattern is:
+Now TypeScript enforces that link buttons always have an href.
 
-- Treat response data as `unknown`
-- Validate the shape
-- Narrow it to a specific type
+## 2) Optional props with defaults
 
-When you do this once, you remove dozens of `as` casts in your UI code and make errors surface early.
+When a prop is optional, set a default value inside the component.
 
-Model UI State as a Union
+```ts
+type CardProps = { size?: "sm" | "md" | "lg" };
 
-Boolean flags do not scale. A component with `isLoading`, `hasError`, and `hasData` often ends up in invalid combinations. A discriminated union avoids that.
+function Card({ size = "md" }: CardProps) {
+  return <div className={`card ${size}`}></div>;
+}
+```
 
-Example state:
+This avoids undefined checks throughout the component.
 
-type FetchState =
+## 3) Generic list components
+
+Generics let you build reusable list components without losing type safety.
+
+```ts
+type ListProps<T> = {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+};
+```
+
+## 4) Polymorphic components
+
+Polymorphic components accept an `as` prop to render different elements while preserving types.
+
+```ts
+type TextProps<E extends React.ElementType> = {
+  as?: E;
+  children: React.ReactNode;
+} & React.ComponentPropsWithoutRef<E>;
+```
+
+## 5) Extracting shared prop types
+
+If multiple components share props, define a base type to avoid duplication.
+
+```ts
+type BaseInputProps = {
+  id: string;
+  label: string;
+  error?: string;
+};
+```
+
+## 6) Narrowing with type guards
+
+When data can be multiple shapes, use type guards to narrow safely.
+
+```ts
+function isUser(x: any): x is { id: string; name: string } {
+  return x && typeof x.id === "string";
+}
+```
+
+## 7) Safer event types
+
+Use explicit event types for handlers:
+
+```ts
+function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+  setValue(e.target.value);
+}
+```
+
+## 8) Exhaustive checks for safety
+
+When using unions, add a `never` check to make sure all cases are handled.
+
+```ts
+type Status = "idle" | "loading" | "error";
+
+function renderStatus(s: Status) {
+  switch (s) {
+    case "idle":
+      return "Idle";
+    case "loading":
+      return "Loading";
+    case "error":
+      return "Error";
+    default: {
+      const _exhaustive: never = s;
+      return _exhaustive;
+    }
+  }
+}
+```
+
+## 9) Readonly props for stability
+
+If a prop should not be mutated, mark it as readonly. This protects you from accidental changes in complex components.
+
+```ts
+type Config = Readonly<{
+  id: string;
+  enabled: boolean;
+}>;
+```
+
+## 10) API response types
+
+Define response types once and reuse them across the app:
+
+```ts
+type User = { id: string; name: string };
+type UsersResponse = { data: User[] };
+```
+
+This keeps your UI strongly typed from fetch to render.
+
+## 11) Async state pattern
+
+Model async UI states with a union instead of a handful of booleans.
+
+```ts
+type LoadState<T> =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "success"; data: User[] }
+  | { status: "success"; data: T }
   | { status: "error"; message: string };
+```
 
-This gives you three benefits:
+This forces you to handle every state explicitly.
 
-- The UI can render based on `status`
-- TypeScript only allows the right fields in each case
-- You can use exhaustive checks to catch missing branches
+## 12) Utility types you should know
 
-Prefer Narrow Types With `as const`
+- `Partial<T>` for optional props
+- `Pick<T, K>` for selecting fields
+- `Omit<T, K>` for removing fields
 
-Literal types let TypeScript keep exact string values instead of widening to `string`. This is especially useful for config objects and action names.
+These make it easy to build clean prop types without duplication.
 
-Example:
+## 13) Conditional props
 
-const viewModes = ["grid", "list", "compact"] as const;
+Conditional props let you enforce rules like \"if `href` exists, render an anchor\".
 
-Now the type is `"grid" | "list" | "compact"` instead of `string`, which prevents accidental typos in UI logic.
+```ts
+type LinkProps =
+  | { href: string; onClick?: never }
+  | { href?: never; onClick: () => void };
+```
 
-Use Type Guards and Exhaustive Checks
+## 14) Generics in UI components
 
-When a value could be one of several shapes, write a guard so the compiler can help you.
+Generics make components reusable without losing type safety.
 
-Example guard:
+```ts
+type SelectProps<T> = {
+  items: T[];
+  getLabel: (item: T) => string;
+};
+```
 
-function isError(value: FetchState): value is { status: "error"; message: string } {
-  return value.status === "error";
-}
+This pattern avoids `any` while staying flexible.
 
-Then, when you render, you can do a final check:
+## 15) The satisfies operator
 
-switch (state.status) {
-  case "idle":
-  case "loading":
-  case "success":
-  case "error":
-    return ...
-  default:
-    const _exhaustive: never = state;
-    return _exhaustive;
-}
+The `satisfies` operator lets you validate an object shape without widening types.
 
-The `never` assignment tells you when a new state was added but not handled.
-
-Result Types for Error Handling
-
-When a function can fail, model the result explicitly instead of throwing at random layers. A small Result type makes errors visible and keeps control flow consistent.
-
-Example idea:
-
-type Result<T> = { ok: true; value: T } | { ok: false; error: string };
-
-This pattern works well for form submissions, parsing, and API helpers.
-
-Use `satisfies` for Config Objects
-
-When you build config objects, `satisfies` lets you validate the shape without widening the type. You keep literal values while still verifying the structure.
-
-Example:
-
+```ts
 const routes = [
-  { path: "/blog", label: "Blog" },
-  { path: "/about", label: "About" }
-] satisfies Array<{ path: string; label: string }>;
+  { label: "Home", href: "/" },
+] satisfies { label: string; href: string }[];
+```
 
-This catches missing keys but keeps the literal strings intact.
+This keeps types precise and avoids accidental errors.
 
-Prefer Readonly for Shared Data
+## 16) ComponentProps for consistency
 
-If data should not be mutated by consumers, mark it as readonly. This prevents accidental edits and makes shared state easier to reason about.
+Use `React.ComponentProps` to reuse prop types and keep wrappers consistent.
 
-Good uses:
+```ts
+type ButtonProps = React.ComponentProps<"button">;
+```
 
-- Shared constants
-- Cached API results
-- Objects passed to many components
+## 17) Template literal types
 
-Immutability is not a rule, but it is a strong default for UI data.
+Template literal types let you encode patterns, like design token keys.
 
-Typed Component Props and Hooks
+```ts
+type ColorToken = `color-${"primary" | "secondary"}`;
+```
 
-Give reusable components and hooks clear props and return types. This improves discoverability and makes changes safer over time.
+## 18) as const for literal inference
 
-Practical habits:
+Use `as const` to keep literal types when defining config objects.
 
-- Use explicit return types for shared hooks
-- Keep prop names consistent across similar components
-- Prefer optional props only when they are truly optional
+```ts
+const sizes = ["sm", "md", "lg"] as const;
+type Size = typeof sizes[number];
+```
 
-Small type decisions here reduce friction across the codebase.
+## 19) Union types vs enums
 
-Type Safe IDs and Domain Primitives
+Union types are often simpler and tree shake better than enums. Prefer unions unless you need enum reverse mapping.
 
-IDs, currency, and dates are often just strings in code. That makes it easy to mix the wrong values. Consider branded types for critical identifiers so mistakes are caught at compile time.
+## 20) HTML element props reuse
 
-Example idea:
+If you wrap native elements, reuse their prop types so you do not lose attributes:
 
-type UserId = string & { __brand: "UserId" };
+```ts
+type InputProps = React.ComponentPropsWithoutRef<"input"> & { label: string };
+```
 
-You can create branded values at the boundary and keep the rest of the app safer.
+This keeps your wrapper flexible and type safe.
 
-Type Safe Routing and Links
+## 21) Narrowing with the in operator
 
-Broken links are a common UI bug. Define your routes as constants and build helpers that accept only known paths.
+When data has multiple shapes, you can narrow it like this:
 
-Simple pattern:
+```ts
+if ("href" in props) {
+  // props is now the link variant
+}
+```
 
-const routes = {
-  blog: "/blog",
-  about: "/about"
-} as const;
+This keeps runtime checks simple and type safe.
 
-This reduces typos and makes refactors less risky.
+## 22) Readonly arrays
 
-Type Tests and Tooling
+When data should not be mutated, use `readonly` arrays to prevent accidental changes.
 
-The type system can be tested just like runtime code. Add small type tests for tricky utilities and shared APIs.
+```ts
+const tags: readonly string[] = ["frontend", "ui"];
+```
 
-Good options:
+## 23) Strict mode wins
 
-- Use `tsc` to validate type expectations
-- Add lint rules to prevent `any`
-- Document complex types with short examples
+Enable `strict` in TypeScript so missing types and unsafe code are caught early. It can feel noisy at first, but it saves time on bugs later.
+Most teams find it improves confidence in refactors.
 
-This keeps the type layer healthy as the project grows.
+## Common mistakes
 
-Incremental Adoption in Existing Code
+- Using `any` when a union would work
+- Returning `null` instead of a proper empty state type
+- Ignoring strict mode errors and losing safety
 
-If you are migrating a JavaScript app, start at the edges:
+## Related reading
 
-- Add types to API helpers and data models first
-- Type reusable UI components before pages
-- Avoid adding generics everywhere on day one
+- [React Hooks Mental Model](/blog/react-hooks-mental-model)
+- [React State Management Guide](/blog/react-state-management-guide)
+- [React Performance Optimization](/blog/react-performance-optimization)
 
-This keeps the migration smooth and focuses on the highest value areas.
+## Last updated
 
-Make Public APIs Explicit
+2026-01-22
 
-For functions used outside a module, prefer explicit return types. This prevents accidental changes from leaking through the type system.
+## Sources
 
-Good places for explicit types:
+- https://www.typescriptlang.org/docs/handbook/2/everyday-types.html
+- https://react-typescript-cheatsheet.netlify.app/
 
-- Data fetching helpers
-- Reusable hooks
-- Component props factories
-- Utility functions in shared packages
+## Author
 
-Local functions inside a component can rely on inference to stay concise.
-
-Keep Generics Focused
-
-Generics are powerful but they can make component props confusing. A good rule is: if a component is used in only one way, do not make it generic. If it is truly reusable, keep the generic simple.
-
-Example patterns that scale:
-
-- `List<T>` for a simple list
-- `Select<T extends { id: string; label: string }>` for a standard shape
-
-Avoid generic props that force callers to write complex types just to use a simple component.
-
-Utility Types With Care
-
-Utility types like `Pick`, `Omit`, and `Partial` are handy. Overusing them can make types hard to follow.
-
-Tips:
-
-- Use `Pick` to create narrow view models for UI
-- Use `Omit` when you are extending a type for a new layer
-- Avoid deep `Partial` in critical business logic, it hides missing data
-
-Think of utility types as a short cut, not as a permanent API.
-
-Organize Types Around Domains
-
-Place types near the domain they describe. If you have a `user` domain, keep types like `User`, `UserProfile`, and `UserSettings` together. This reduces the temptation to create generic types that mix unrelated concepts.
-
-When types are grouped by domain, it becomes easier to refactor code without breaking unrelated areas.
-
-Build a Strict Baseline
-
-Enable strict settings early:
-
-- `strict: true`
-- `noImplicitAny: true`
-- `noUncheckedIndexedAccess: true`
-
-The goal is not to satisfy the compiler at all costs. The goal is to make silent failures harder to ship.
-
-Create View Models for the UI
-
-Backend types are often too broad for UI needs. Create small view models in the UI layer that represent what the screen actually renders. This keeps components focused and avoids accidental coupling to backend fields that might change.
-
-A simple workflow:
-
-- Parse the API response
-- Map it to a UI friendly shape
-- Pass the view model into components
-
-This extra step makes refactors safer and keeps components clean.
-
-Handle Form Data Safely
-
-Form input arrives as strings. Convert and validate early, and do not pass raw form data deep into your app.
-
-Good habits:
-
-- Parse numbers with `Number()` and handle `NaN`
-- Normalize booleans from checkboxes and toggles
-- Use literal unions for select options
-
-This prevents a common class of bugs where UI state looks correct but types are wrong.
-
-Runtime Validation at the Boundary
-
-Static types do not replace runtime validation. When you receive data from the network or local storage, validate it once and keep the rest of the app clean.
-
-Simple approach:
-
-- Check required fields and types
-- Provide sensible fallbacks for missing data
-- Log or surface errors in a controlled way
-
-This prevents broken UI states that only appear in production data.
-
-Feature Flags and Experiments
-
-Feature flags are often just strings or booleans, but you can model them with strict unions. This helps you avoid misspelled flag names and unexpected values.
-
-Example idea:
-
-type FeatureFlag = "newCheckout" | "promoBanner" | "navRefresh";
-
-Typed flags make it safe to remove or rename a feature later.
-
-Common Pitfalls to Avoid
-
-- Using `any` to silence real problems
-- Casting with `as` instead of narrowing with guards
-- Making giant unions that mix unrelated domains
-- Allowing `undefined` to flow through critical state
-
-If you see these patterns, consider simplifying the types or adding a small validation step.
-
-Conclusion
-
-TypeScript is not just a layer of types, it is a feedback loop for design. Model your UI states with unions, validate data at the boundary, and keep types close to the domain. These patterns keep your UI code safer without making it feel rigid.
+I am Toseef, a frontend engineer who builds Angular, React, and Next.js apps for real products. I write practical guides based on work experience and common team pitfalls. If you want to collaborate, visit [About](/about) or [Contact](/contact).

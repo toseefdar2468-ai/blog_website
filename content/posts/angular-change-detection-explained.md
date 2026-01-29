@@ -1,4 +1,4 @@
----
+﻿---
 title: "Angular Change Detection Explained Simply"
 date: "2026-01-01"
 description: "Learn how Angular change detection works, what triggers it, and how to use OnPush and other tips for better performance."
@@ -6,178 +6,201 @@ slug: "angular-change-detection-explained"
 image: "/images/angular-change-detection.png"
 ---
 
-Angular Change Detection Explained Simply
+# Angular Change Detection Explained Simply
 
-Angular apps feel fast when the UI updates at the right time and only when needed. Change detection is the system that keeps the template in sync with your data. It decides when Angular should check components and update the DOM.
+Change detection is the system that keeps your UI and data in sync. It is also the source of most performance questions in Angular. If you learn the mental model and a few practical tools, you can debug slow screens with confidence.
 
-In this guide you will learn:
+This guide explains what triggers a check, how Default and OnPush differ, and how I decide which strategy to use in real projects.
 
-- What change detection is
-- What triggers it
-- The difference between Default and OnPush
-- How immutability helps performance
-- Practical tips to avoid slow renders
+## The simple mental model
 
-What Is Change Detection?
+Picture your component tree as a set of boxes. Whenever something happens (a click, a timer, an HTTP response), Angular walks the tree and asks each component: "Do you need to update the DOM?"
 
-Change detection is the process of comparing the current data model with what is shown in the template, then updating the DOM if something changed. It runs after events like clicks, timers, HTTP responses, or any async task that Angular knows about.
+That walk is the change detection cycle. The default strategy checks everything. OnPush checks only when inputs change by reference or when the component itself triggers a change.
 
-Think of it as Angular asking: "Has anything changed since the last check?" If the answer is yes, it updates the view.
+## What actually triggers change detection
 
-How Angular Knows When to Run
+These are the common triggers:
 
-Angular uses Zone.js to patch async events. When a user clicks a button or a promise resolves, Angular starts a change detection cycle.
+- User events like click or input
+- Async tasks like Promises, setTimeout, or HttpClient
+- Async pipe emissions in templates
+- Manual triggers through ChangeDetectorRef
 
-Common triggers include:
+Zone.js patches many async APIs so Angular knows when work finishes. That is why clicks and HTTP responses automatically update the view.
 
-- Clicks and input events
-- HTTP responses from HttpClient
-- setTimeout and setInterval
-- Promises and async pipes
+## Default vs OnPush in plain English
 
-Default Change Detection Strategy
+Default strategy means: "Every time something happens, check everything."
 
-By default, Angular checks every component in the tree whenever a change detection cycle runs. This is safe and simple, but it can become expensive in large apps.
+OnPush means: "Only check this component when its inputs change, an event happens inside it, or I explicitly mark it."
 
-The default strategy works well for:
+Default is safe and simple. OnPush is faster and more predictable, but it requires good data hygiene.
 
-- Small to medium apps
-- Simple component trees
-- Apps that do not have heavy UI updates
+## A small OnPush example
 
-OnPush Strategy
+```ts
+import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 
-OnPush tells Angular to skip checking a component unless one of these happens:
+@Component({
+  selector: "app-score",
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="score">
+      <strong>{{ label }}</strong>
+      <span>{{ value }}</span>
+    </div>
+  `,
+})
+export class ScoreComponent {
+  @Input() label = "Score";
+  @Input() value = 0;
+}
+```
 
-- An @Input reference changes
-- An event happens inside the component
-- An observable used with the async pipe emits
-- You manually mark it for check
+If you mutate an object in place, OnPush will not see a new reference. Use immutable updates instead.
 
-OnPush makes performance more predictable. It also encourages better state management and immutability.
+```ts
+// bad: same reference
+player.stats.score += 1;
 
-Immutability and Why It Matters
+// good: new reference
+player = { ...player, stats: { ...player.stats, score: player.stats.score + 1 } };
+```
 
-OnPush works best when you treat data as immutable. Instead of mutating arrays or objects, create new references.
+## The data flow that keeps OnPush happy
 
-Example:
+I use three rules to keep OnPush predictable:
 
-- Bad: `items.push(newItem)`
-- Good: `items = [...items, newItem]`
+1) Inputs are immutable
+2) Derived values are computed in the component class
+3) Streams are handled with async pipe
 
-When you replace the array, Angular sees a new reference and updates the view.
+That alone removes most "why did this not update" bugs.
 
-Async Pipe to Reduce Manual Work
+## Using ChangeDetectorRef correctly
 
-The async pipe handles subscriptions and automatically triggers change detection when new data arrives. It also cleans up subscriptions when the component is destroyed.
+Sometimes you need a manual nudge, usually when working with non Angular libraries.
 
-Benefits:
+```ts
+import { ChangeDetectorRef } from "@angular/core";
 
-- Less memory leak risk
-- Cleaner templates
-- Automatic updates
+constructor(private cdr: ChangeDetectorRef) {}
 
-trackBy for Large Lists
+updateFromLibrary(result: string) {
+  this.value = result;
+  this.cdr.markForCheck();
+}
+```
 
-Rendering lists can be slow if Angular cannot track which items changed. Use `trackBy` with `*ngFor` to avoid re-rendering the entire list.
+Use `markForCheck` to schedule a refresh in the next cycle. Reserve `detectChanges` for rare cases where you must update immediately.
 
-Example:
+## Performance bottlenecks you can actually fix
 
-*ngFor="let item of items; trackBy: trackById"
+If a screen is slow, I check these first:
 
-trackById(index, item) {
+- Big lists without trackBy
+- Multiple expensive pipes in templates
+- Large components with lots of bindings
+- Frequent async updates from timers or websockets
+
+### trackBy in lists
+
+```html
+<li *ngFor="let item of items; trackBy: trackById">{{ item.name }}</li>
+```
+
+```ts
+trackById(_: number, item: { id: string }) {
   return item.id;
 }
+```
 
-Change Detection and Performance Tips
+This keeps the DOM stable and avoids full re renders.
 
-1) Use OnPush for components with stable inputs
-2) Avoid mutating large objects directly
-3) Use async pipe for observable data
-4) Split heavy components into smaller ones
-5) Add trackBy to long lists
+### Avoid heavy logic in templates
 
-When Manual Change Detection Is Needed
+If a template uses complex expressions, move them into the class. That reduces repeated work during each cycle.
 
-Sometimes Angular does not know about a change, for example if you integrate a non Angular library. In those cases, you can use `ChangeDetectorRef` to trigger a manual check.
+## A real world scenario: filtering a list
 
-Use it carefully:
+Imagine a dashboard where the user types into a search input that filters a list of 500 items. With Default change detection, each keystroke triggers a full tree walk.
 
-- `markForCheck()` to schedule a check
-- `detectChanges()` to run immediately
+A better approach:
 
-Overusing manual checks can make the app harder to reason about.
+- Put the list in its own component
+- Use OnPush on the list component
+- Compute the filtered list in the parent and pass it as an input
+- Use trackBy to stabilize DOM nodes
 
-Common Beginner Mistakes
+This isolates the cost to the part of the UI that changes and keeps the rest of the page stable.
 
-- Assuming OnPush automatically makes everything faster
-- Mutating data and expecting OnPush to update
-- Forgetting trackBy on large lists
-- Using detectChanges everywhere instead of fixing data flow
+## Debugging checklist I actually use
 
-A Simple Mental Model
+1) Is the slow component OnPush?
+2) Are inputs immutable and stable?
+3) Are large lists using trackBy?
+4) Is there a pipe or function running on every change?
+5) Are there timers or intervals that trigger too often?
 
-Think of change detection as a safety net. Default checks are frequent and safe. OnPush checks are fewer and more intentional. When you design your data flow well, OnPush gives you a faster app and simpler debugging.
+If you can answer those, you can solve most real performance issues.
 
-Debugging Change Detection
+## Async pipe vs manual subscription
 
-If a template does not update, the first step is to check how the data changes. OnPush components only update when the input reference changes or an event occurs inside the component.
+The async pipe is not just convenience. It subscribes, updates the view, and unsubscribes automatically. That means fewer memory leaks and fewer places to call `markForCheck`.
 
-Debug steps:
+```html
+<div *ngIf="user$ | async as user">
+  {{ user.name }}
+</div>
+```
 
-- Confirm the input reference actually changed
-- Check if the change happens outside Angular zone
-- Verify that the async pipe is used for observables
+If you manually subscribe, you are responsible for cleanup and for triggering change detection when needed.
 
-These checks solve most issues without manual calls to `detectChanges()`.
+## Profiling a slow component
 
-Async Pipe Patterns
+When a screen feels sluggish, I do this:
 
-The async pipe is the simplest way to keep the view up to date with observable data. It subscribes, updates the view, and unsubscribes automatically.
+1) Open Angular DevTools and profile a user action
+2) Look for components that re render too often
+3) Check templates for heavy pipes or functions
+4) Break large components into smaller ones with OnPush
 
-Good patterns:
+You do not need perfect metrics, just a clear signal of what is hot.
 
-- Use `async` in the template for streams
-- Combine streams with `combineLatest` in the component
-- Avoid manual subscriptions when a template can handle it
+## Signals and change detection
 
-This reduces boilerplate and makes updates consistent.
+If you are using Angular signals, updates are more granular because signals track usage at a finer level than the default zone based approach. You still benefit from OnPush patterns, but the mental model becomes closer to \"update only what is read\".
 
-Performance Audits for Large Apps
+## Quick FAQ
 
-When performance slows, find the components that render most often or handle large lists. A few targeted changes often help more than broad refactors.
+**Does OnPush always make things faster?** Not always. It makes updates more predictable, which usually helps performance, but it also requires clean data flow.
 
-Practical actions:
+**Do I need Zone.js forever?** For most apps, yes. Advanced setups can remove it, but only after you understand the change detection model well.
 
-- Add `trackBy` to any large list
-- Split heavy components into smaller ones
-- Move expensive computations outside templates
+## Common mistakes and how to avoid them
 
-Focus on the biggest wins first.
+- Using OnPush but mutating arrays or objects
+- Calling functions in templates that recompute every cycle
+- Using setInterval without throttling or unsubscribing
+- Triggering manual detection everywhere instead of fixing data flow
 
-Pure Pipes and Template Work
+## Related reading
 
-Angular pipes can be pure or impure. Pure pipes run only when their input changes, which is good for performance. Impure pipes run on every change detection cycle and can slow things down.
+- [Angular Components Explained for Beginners](/blog/angular-components-beginners-guide)
+- [Angular Signals and Standalone Components](/blog/angular-signals-standalone-components)
+- [Angular Dependency Injection](/blog/angular-services-dependency-injection-beginners)
 
-Guidelines:
+## Last updated
 
-- Keep pipes pure by default
-- Avoid heavy work inside templates
-- Move expensive logic into the component or service
+2026-01-22
 
-This keeps templates fast and predictable.
+## Sources
 
-Change Detection Outside Angular
+- https://angular.dev/guide/change-detection
+- https://angular.dev/guide/zone
 
-Some third party libraries run outside Angular's zone. If UI updates do not appear, you can run the update inside Angular or trigger a check manually.
+## Author
 
-Options:
-
-- Wrap the update in `ngZone.run(...)`
-- Call `markForCheck()` in an OnPush component
-
-Use these options sparingly and prefer clean data flow whenever possible.
-
-Conclusion
-
-Change detection is at the heart of Angular. When you understand how it works, you can build faster and more predictable UI. Start with the default strategy, then move to OnPush where it makes sense. Pair it with immutability, async pipes, and trackBy to keep your app responsive as it grows.
+I am Toseef, a frontend engineer who builds Angular, React, and Next.js apps for real products. I write practical guides based on work experience and common team pitfalls. If you want to collaborate, visit [About](/about) or [Contact](/contact).

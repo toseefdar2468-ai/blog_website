@@ -1,72 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/</loc>
+    <loc>https://your-domain.com/</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog</loc>
+    <loc>https://your-domain.com/blog</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/about</loc>
+    <loc>https://your-domain.com/about</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/contact</loc>
+    <loc>https://your-domain.com/contact</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/privacy-policy</loc>
+    <loc>https://your-domain.com/privacy-policy</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-beginner-guide</loc>
+    <loc>https://your-domain.com/terms</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-change-detection-explained</loc>
+    <loc>https://your-domain.com/blog/angular-beginner-guide</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-components</loc>
+    <loc>https://your-domain.com/blog/angular-change-detection-explained</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-dependency-injection</loc>
+    <loc>https://your-domain.com/blog/angular-components-beginners-guide</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-forms-template-vs-reactive</loc>
+    <loc>https://your-domain.com/blog/angular-services-dependency-injection-beginners</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-routing-navigation</loc>
+    <loc>https://your-domain.com/blog/angular-forms-template-vs-reactive</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/angular-signals-standalone-components</loc>
+    <loc>https://your-domain.com/blog/angular-routing-navigation-beginners</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/core-web-vitals-playbook</loc>
+    <loc>https://your-domain.com/blog/angular-signals-standalone-components</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/css-architecture-scalable-frontend</loc>
+    <loc>https://your-domain.com/blog/core-web-vitals-playbook</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/css-grid-layout-recipes</loc>
+    <loc>https://your-domain.com/blog/css-architecture-scalable-frontend</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/frontend-accessibility-checklist</loc>
+    <loc>https://your-domain.com/blog/css-grid-layout-recipes</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/nextjs-app-router-fundamentals</loc>
+    <loc>https://your-domain.com/blog/frontend-accessibility-checklist</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/nextjs-data-fetching-strategies</loc>
+    <loc>https://your-domain.com/blog/nextjs-app-router-fundamentals</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/nextjs-seo-metadata-app-router</loc>
+    <loc>https://your-domain.com/blog/nextjs-data-fetching-strategies</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/react-hooks-mental-model</loc>
+    <loc>https://your-domain.com/blog/nextjs-seo-metadata-app-router</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/react-performance-optimization</loc>
+    <loc>https://your-domain.com/blog/react-hooks-mental-model</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/react-state-management-guide</loc>
+    <loc>https://your-domain.com/blog/react-performance-optimization</loc>
   </url>
   <url>
-    <loc>https://osama-portfolio-jarh.vercel.app/blog/typescript-ui-patterns</loc>
+    <loc>https://your-domain.com/blog/react-state-management-guide</loc>
+  </url>
+  <url>
+    <loc>https://your-domain.com/blog/typescript-ui-patterns</loc>
   </url>
 </urlset>

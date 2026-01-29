@@ -1,176 +1,178 @@
----
-title: "React Performance Optimization: Practical Tips"
-date: "2026-01-04"
-description: "Speed up React apps with practical performance tips like memoization, list optimization, and smart component design."
+﻿---
+title: "React Performance Optimization"
+date: "2025-12-31"
+description: "Practical techniques to improve React rendering performance without over-optimizing."
 slug: "react-performance-optimization"
 image: "/images/react-perfomance.png"
 ---
 
-React Performance Optimization: Practical Tips
+# React Performance Optimization
 
-Performance issues in React usually come from unnecessary re renders, expensive computations, or heavy lists. The good news is that most problems can be solved with a few clear patterns. You do not need to micro optimize everything. You just need to know where to apply the right tools.
+React apps feel slow for two main reasons: too many re renders or too much work inside each render. The fix is rarely a single magic hook. It is usually a small set of disciplined habits.
 
-In this article you will learn:
+This guide covers the techniques I actually use, and the ones I avoid until I need them.
 
-- How React re renders work
-- When memoization helps and when it does not
-- How to optimize lists and large UI
-- Practical patterns for faster apps
-- A checklist to debug slow components
+## Start with the simplest fix
 
-Start With the Render Model
+Before you reach for memoization, check these:
 
-React re renders a component when its state or props change. When a parent re renders, its children also re render by default. This is correct behavior, but it can be expensive if the child is heavy.
+- Are you rendering large lists without virtualization?
+- Are you passing new objects on every render?
+- Are you doing heavy work in render?
 
-The first step in optimization is to identify which components re render too often and why.
+Simple fixes often deliver the biggest wins.
 
-Measure Before You Optimize
+## Use React.memo for stable components
 
-Use the React DevTools profiler to identify slow components. If a component renders fast, optimizing it is wasted effort.
+If a component renders the same output for the same props, memoization can prevent extra work.
 
-Questions to ask:
+```tsx
+const UserRow = React.memo(function UserRow({ user }) {
+  return <div>{user.name}</div>;
+});
+```
 
-- Which components render the most often?
-- Which renders take the longest time?
-- Are re renders triggered by props that do not actually change?
+## Memoize expensive calculations
 
-Memoizing Components with React.memo
+```tsx
+const total = useMemo(() => items.reduce((sum, i) => sum + i.price, 0), [items]);
+```
 
-If a component renders the same output for the same props, you can wrap it with `React.memo`. This tells React to skip re rendering when props are unchanged.
+Use `useMemo` only when the calculation is expensive or the value is passed to memoized children.
 
-Use it when:
+## Avoid re creating callbacks
 
-- The component is pure
-- The component is expensive to render
-- It receives stable props
+```tsx
+const onSave = useCallback(() => save(items), [items]);
+```
 
-Do not use it everywhere. It adds overhead and can make debugging harder.
+Stable callbacks prevent unnecessary child renders.
 
-Memoizing Values and Callbacks
+## Virtualize large lists
 
-useMemo caches a computed value. useCallback caches a function reference. Both can help when you pass values to memoized children or when a computation is expensive.
+If you render hundreds of rows, use list virtualization (like react-window). It keeps the DOM small and fast.
 
-Examples of good use cases:
+## Profile before you optimize
 
-- Sorting a large list
-- Creating configuration objects for chart libraries
-- Passing callbacks into memoized child components
+Use React DevTools Profiler to record a user interaction. It shows which components rendered and how long each took. This keeps optimization focused on real bottlenecks.
 
-If the computation is cheap, skip memoization.
+## Colocate state to reduce renders
 
-Optimize Lists with Keys and Virtualization
+When state is stored too high, unrelated parts of the UI re render. Move state closer to where it is used.
 
-Large lists are a common performance issue. Use stable keys so React can update only the items that changed.
+Example: A search input should own its query state, not the entire dashboard.
 
-Checklist for lists:
+## Avoid expensive work in render
 
-- Use a unique key like `item.id`
-- Avoid using the array index as a key
-- For very large lists, use list virtualization
+If you map over 1,000 items or sort on every render, performance will suffer. Move expensive work into a memo or precompute it when data changes.
 
-Virtualization libraries render only the visible items, reducing DOM cost significantly.
+## Suspense and streaming
 
-Split Components for Better Updates
+For data heavy pages, Suspense can keep the UI responsive by showing partial content while data loads.
 
-Small focused components can reduce unnecessary re renders. If a large component has unrelated sections, split them so updates only affect the part that changed.
+## Splitting bundles
 
-Example:
+Lazy load heavy components so they do not block the initial render.
 
-- Separate a sidebar from the main content
-- Split a form into smaller field groups
-- Extract complex UI into a child component
+```tsx
+const Chart = React.lazy(() => import("./Chart"));
+```
 
-Avoid Inline Objects and Functions
+Wrap lazy components in Suspense so users see a fallback while the code loads.
 
-Every render creates new object and function references. If you pass them as props, memoized children may still re render.
+## Avoid recreating objects in props
 
-Fix this by:
+If you pass `{}` or `[]` directly in JSX, React sees a new reference on every render. Move these objects outside the render or memoize them.
 
-- Using useMemo for objects
-- Using useCallback for functions
-- Keeping props stable where possible
+## useTransition for smoother updates
 
-Use Transition for Non Urgent Updates
+If a state update causes a heavy re render, use `startTransition` so React treats it as non urgent.
 
-React 18 introduced `useTransition` to mark updates as low priority. This helps keep input responsive while heavy updates occur.
+```tsx
+const [isPending, startTransition] = useTransition();
+```
 
-Use it for:
+This keeps input responsive while expensive work runs in the background.
 
-- Filtering large lists
-- Updating charts
-- Switching views with heavy data
+## Keys and list rendering
 
-Common Mistakes
+Always use stable keys when rendering lists. Unstable keys force React to recreate DOM nodes, which is expensive and can break input state.
 
-- Memoizing everything without profiling
-- Storing derived data in state
-- Creating huge components with many responsibilities
-- Re rendering lists without stable keys
+## Memoization tradeoffs
 
-Performance Checklist
+Memoization is not free. It adds memory overhead and makes code harder to read. Use it when it removes real work, not as a default habit.
 
-- Are you measuring with the profiler?
-- Are heavy components memoized where it matters?
-- Are list keys stable and unique?
-- Are you avoiding unnecessary object and function props?
-- Have you considered virtualization for large lists?
+## Re renders are not always bad
 
-Batching and Render Timing
+React is fast at re rendering small components. Focus on the slow parts: large lists, heavy charts, and complex layouts.
 
-React batches state updates to reduce renders. When multiple updates happen in the same event, React combines them into a single render. This is good for performance, but it also means you should not rely on state updates being applied immediately.
+## Measure in production
 
-Practical guidance:
+Development mode is slower than production. If a component feels slow, test the production build or use monitoring tools to measure real user performance.
 
-- Use functional updates when the next state depends on the previous state
-- Avoid chaining multiple setState calls that depend on each other
-- Prefer a single state object or reducer for related updates
+## Derived data and selectors
 
-Suspense and Incremental Rendering
+If you compute derived data from large arrays, memoize the result based on the input array. This avoids repeated work on every render.
 
-Suspense can improve perceived performance by allowing parts of the UI to load independently. Even if data takes time, users can see the layout and interact with parts of the page.
+## React.memo vs useMemo
 
-Use it for:
+`React.memo` prevents a component from re rendering when props are the same. `useMemo` memoizes a value inside a component. Use memo for component boundaries and useMemo for heavy computations.
 
-- Code splitting with lazy loaded components
-- Data loading with compatible libraries
-- Progressive rendering on slow networks
+## Optimize list row components
 
-Keep fallback UI simple so it does not become its own performance problem.
+If you render long lists, memoize the row component and pass stable props. It reduces re renders when only a few items change.
 
-Avoiding Layout Thrash
+## Context updates can be expensive
 
-Frequent measurements like `getBoundingClientRect` or forced reflows can slow down rendering. If you must measure layout, batch reads and writes.
+If you use context for data that changes often, every consumer re renders. Split contexts or memoize the context value to reduce unnecessary updates.
+This is one of the most common hidden sources of re renders in large apps.
 
-Good habits:
+## DOM measurements
 
-- Read layout values first, then apply style changes
-- Avoid measuring inside loops for large lists
-- Use CSS for layout whenever possible
+Measuring layout (like `getBoundingClientRect`) can be expensive if done too often. Batch measurements and avoid doing them in every render.
 
-Profiling Workflow
+## A simple optimization workflow
 
-A simple process helps you avoid guesswork:
+1) Measure with the Profiler
+2) Fix the biggest offender
+3) Re measure
+4) Stop when the UI feels fast
 
-1) Reproduce the slow path
-2) Profile the component tree
-3) Identify the top slow components
-4) Apply a targeted optimization
-5) Re profile to confirm the change
+Over optimizing adds complexity. Stop when users are happy.
 
-This keeps optimization focused and measurable.
+## Practical checklist
 
-Pagination and Windowing
+- Use React.memo for stable components
+- Memoize expensive calculations
+- Avoid recreating objects and functions in props
+- Virtualize long lists
+- Keep state as local as possible
 
-If a list is too large, consider pagination or infinite scroll instead of rendering thousands of items. This reduces DOM size and keeps interactions smooth, even on low powered devices.
+## Small case study
 
-Context Performance Considerations
+On a dashboard with a list of 2,000 rows, virtualization reduced render time from several seconds to under 200ms. The fix was small, but the user experience difference was huge.
 
-Context updates re render all consumers. If the value changes often, consider splitting context or memoizing the value. This keeps unrelated parts of the tree from updating unnecessarily.
+## Common mistakes
 
-Avoid Unnecessary State
+- Memoizing everything (adds overhead)
+- Creating new objects in JSX props
+- Storing derived state instead of computing it
 
-If a value can be derived from props or other state, do not store it. Derived state increases render work and adds extra update paths.
+## Related reading
 
-Conclusion
+- [React Hooks Mental Model](/blog/react-hooks-mental-model)
+- [React State Management Guide](/blog/react-state-management-guide)
+- [TypeScript UI Patterns](/blog/typescript-ui-patterns)
 
-React performance optimization is about smart tradeoffs. Start by measuring, then apply memoization only where it helps. Keep components focused, optimize lists, and keep props stable. With these practices, your app stays fast without becoming overly complex.
+## Last updated
+
+2026-01-22
+
+## Sources
+
+- https://react.dev/learn/render-and-commit
+- https://react.dev/reference/react/useMemo
+
+## Author
+
+I am Toseef, a frontend engineer who builds Angular, React, and Next.js apps for real products. I write practical guides based on work experience and common team pitfalls. If you want to collaborate, visit [About](/about) or [Contact](/contact).

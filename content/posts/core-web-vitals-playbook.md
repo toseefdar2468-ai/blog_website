@@ -1,290 +1,212 @@
----
-title: "Core Web Vitals Playbook for Frontend Teams"
-date: "2026-01-09"
-description: "Actionable steps to improve LCP, INP, and CLS with measurement, budgets, and real-world fixes."
+﻿---
+title: "Core Web Vitals Playbook"
+date: "2026-01-07"
+description: "A practical playbook for improving LCP, INP, and CLS with clear actions and checks."
 slug: "core-web-vitals-playbook"
 image: "/images/core-web-vital.png"
 ---
 
-Core Web Vitals Playbook for Frontend Teams
+# Core Web Vitals Playbook
 
-Core Web Vitals are not just a Google metric, they are a user experience metric. Faster pages feel better, convert better, and are easier to maintain. The trick is to focus on the few actions that move the numbers.
+Core Web Vitals are not magic scores. They are a proxy for how your site feels. This playbook shows how I triage problems, pick the highest impact fixes, and verify improvements.
 
-In this guide you will learn:
+If you have ever asked, "Why is my site slow even though the code looks fine?" this guide is for you.
 
-- What LCP, INP, and CLS measure
-- The thresholds that define good performance
-- How to measure with real user data
-- The most common fixes that move the needle
-- How to create a performance budget
+## The three metrics that matter
 
-Know the Targets
+- LCP (Largest Contentful Paint): how fast the main content appears
+- INP (Interaction to Next Paint): how quickly the page responds to input
+- CLS (Cumulative Layout Shift): how stable the layout feels
 
-The current targets are:
+These are user experience metrics, not just technical vanity numbers.
 
-- LCP under 2.5 seconds
-- INP under 200 ms
-- CLS under 0.1
+## Field data vs lab data
 
-Use these as goals, not as a one time checklist. The metrics can drift as content changes and scripts are added.
+There are two ways to measure performance:
 
-Field vs Lab Data
+- Field data (real user data) tells you what people actually experience
+- Lab data (Lighthouse) helps you debug in a controlled environment
 
-Lab tools are great for debugging, but approvals depend on real user data. Use lab tests to diagnose issues, then confirm changes with field data.
+I start with field data to understand the real problem, then use lab tools to reproduce and fix it.
 
-Practical approach:
+## How I measure and validate
 
-- Use Lighthouse or DevTools for quick feedback
-- Validate with real user monitoring
-- Focus on mobile performance first
+1) Check the PageSpeed Insights report for the URL
+2) Compare against Search Console Core Web Vitals
+3) Use Chrome DevTools Performance to locate bottlenecks
+4) Re test after each change
 
-This keeps improvements aligned with real visitors.
+Small wins compound quickly when you measure consistently.
 
-Improve LCP First
+## The order I fix things
 
-LCP is usually the largest image or block of text in the viewport. To improve it:
+1) Make the hero content load fast (LCP)
+2) Make interactions responsive (INP)
+3) Stop layout jumps (CLS)
 
-- Optimize hero images and use modern formats
-- Preload the critical image and fonts
-- Render content on the server when possible
-- Reduce JavaScript that blocks the first render
+You get the most visible win by fixing LCP first.
 
-A small change to the hero image often produces the largest gain.
+## LCP: make the main content appear fast
 
-Identify the LCP Element
+Common LCP blockers:
 
-Use the Performance panel or Lighthouse to see which element is marked as the LCP. Once you know the element, the optimization path is clearer.
+- Large hero images
+- Render blocking CSS
+- Slow server response time
+- Heavy client side JS
 
-Focus on:
+### LCP checklist
 
-- Compressing and sizing the asset correctly
-- Loading it early with the right priority
-- Avoiding late style changes that delay render
+- Compress hero images (WebP or AVIF)
+- Serve properly sized images, not the original 4k asset
+- Preload the hero font or use a system font
+- Avoid client side rendering for above the fold content
 
-This keeps LCP work focused and measurable.
+Example of preloading a hero font:
 
-Reduce TTFB for Faster LCP
+```html
+<link rel="preload" href="/fonts/brand.woff2" as="font" type="font/woff2" crossorigin />
+```
 
-The server response time sets the ceiling for LCP. If HTML arrives late, LCP cannot be fast.
+### Image strategy that works
 
-High impact fixes:
+- Use modern formats (AVIF or WebP)
+- Serve the right size for the screen
+- Avoid CSS background images for critical content
 
-- Cache HTML for content pages
-- Use a CDN close to users
-- Reduce server work in the request path
+If the hero image is the LCP element, treat it like a first class asset.
 
-Even a few hundred milliseconds here can make a big difference.
+## INP: make the page respond quickly
 
-Reduce INP by Cutting Long Tasks
+INP focuses on responsiveness. If clicking a button feels sluggish, you likely have main thread work that is too heavy.
 
-INP measures how quickly the page responds to user input. It replaces FID and focuses on responsiveness after the first load.
+### INP checklist
 
-Fixes that help:
+- Debounce expensive input handlers
+- Split heavy computations
+- Avoid rendering large lists on every keystroke
+- Use requestIdleCallback for non critical work
 
-- Break up long tasks with `requestIdleCallback` or chunked work
-- Use event delegation instead of many listeners
-- Avoid heavy work in input handlers
-- Defer non critical scripts until after interaction
+A tiny debounce example:
 
-If a click feels slow, INP will reflect it.
+```ts
+function debounce(fn: () => void, ms = 200) {
+  let t: ReturnType<typeof setTimeout> | undefined;
+  return () => {
+    if (t) clearTimeout(t);
+    t = setTimeout(fn, ms);
+  };
+}
+```
 
-Hydration and Main Thread Work
+### Reduce main thread work
 
-On modern frameworks, hydration cost can hurt INP. Reduce client JavaScript for pages that do not need interactivity.
+If INP is bad, something is blocking the main thread. Fixes that help:
 
-Strategies:
+- Split large bundles
+- Move analytics and widgets to load later
+- Avoid expensive loops on every input
 
-- Prefer server rendered content where possible
-- Split bundles by route and feature
-- Defer non critical components
+Performance is often about doing less, not doing faster.
 
-The goal is to keep the main thread available when users interact.
+## CLS: stop layout jumps
 
-Keep Event Handlers Lightweight
+Layout shifts hurt trust. Users hate it when buttons move while they tap.
 
-Input delays often come from heavy event handlers. Keep click, input, and scroll handlers fast and push heavy work to background tasks.
+### CLS checklist
 
-Helpful tips:
-
-- Debounce high frequency inputs
-- Avoid layout thrashing inside handlers
-- Use passive listeners for scroll where possible
-
-Small handler changes can have a big impact on INP.
-
-Prevent CLS With Stable Layouts
-
-Layout shifts happen when the browser has to move content after it is already visible. Prevent this by reserving space:
-
-- Set width and height for images
+- Set width and height on images
 - Reserve space for ads and embeds
 - Avoid inserting banners above existing content
-- Use font loading strategies to reduce text shifts
 
-CLS is easiest to fix early, before the layout becomes complex.
+Example:
 
-Ads, Embeds, and Layout Stability
+```html
+<img src="/hero.jpg" width="1200" height="640" alt="" />
+```
 
-Ads and embeds are a common source of CLS. Reserve space for them and avoid late inserts.
+### Ads and embeds
 
-Good practices:
+If you run ads or embeds, always reserve space. A small placeholder box prevents the entire page from shifting when the ad loads.
 
-- Use fixed height containers for ad slots
-- Load ads after layout is stable
-- Avoid pushing content downward after render
+## A simple performance budget
 
-Stable slots protect both UX and performance scores.
+Budgets keep teams aligned. Here is a baseline:
 
-Font Loading and CLS
+```txt
+Page size: <= 250 KB (compressed)
+Main thread blocking: <= 150 ms before first input
+Largest image: <= 200 KB
+```
 
-Fonts can cause layout shifts when they swap in late. Use `font-display: swap` or `optional`, and preload the fonts used above the fold.
+Budgets turn "performance" into a visible target during reviews.
 
-If a font changes text width significantly, consider a fallback with similar metrics to reduce shifts.
+## Real world triage example
 
-Measure With Real User Data
+If a blog feels slow:
 
-Lab tools are helpful, but they do not always reflect real users. Use a real user monitoring approach:
+1) Check the hero image size
+2) Measure server response time
+3) Remove unused scripts
+4) Defer non critical widgets
 
-- Collect metrics with the `web-vitals` library
-- Track results by page type and device
-- Compare before and after for each change
+Often you can reduce LCP by half with one or two targeted changes.
 
-This gives you confidence that the fixes actually help visitors.
+## Monitoring over time
 
-Use Lab Tools for Debugging
+After fixes, keep an eye on regressions:
 
-When a metric is bad, lab tools help you find the root cause.
+- Track performance in CI for key pages
+- Use alerts if LCP or INP spikes
+- Re test after big design changes
 
-Useful tools:
+Performance is not a one time task; it is an ongoing habit.
 
-- Lighthouse for performance audits
-- Performance panel for long tasks
-- WebPageTest for waterfall analysis
+## Server response time matters
 
-Use these for diagnosis, then validate with field data.
+If Time to First Byte is slow, LCP will be slow no matter how optimized the front end is. Check your hosting, enable caching, and avoid slow database queries for public pages.
 
-Test on Realistic Devices
+## CDN and caching basics
 
-High end laptops hide performance problems. Test on mid range phones and slower networks to match real user conditions.
+Serving static assets from a CDN reduces latency. Use long cache headers for images, fonts, and static JS bundles. For HTML, use caching only when content is static or revalidated.
 
-This often reveals INP and LCP issues that do not appear on fast hardware.
+These changes are boring, but they often deliver the biggest wins.
 
-Create a Performance Budget
+## Third party scripts
 
-A budget turns performance into a team habit. Examples:
+Analytics, chat widgets, and ads can hurt INP and LCP. Load them after the main content and avoid blocking the initial render.
 
-- Maximum JavaScript size per page
-- Maximum image weight for hero sections
-- Target LCP for landing pages
+## Fonts and layout shifts
 
-Budgets are easier to follow when they are tied to CI checks and release gates.
+Custom fonts can cause layout shift if they load late. Use `font-display: swap` and preload critical fonts to reduce CLS and improve LCP.
 
-Budgets That Teams Can Enforce
+## INP vs FID
 
-Make budgets simple and visible:
+INP replaces FID as the primary responsiveness metric. If you previously optimized for FID, focus now on reducing long tasks and heavy event handlers across the page, not just on the first input.
 
-- JS size per route
-- Largest image weight on landing pages
-- Target LCP and INP for key templates
+If lab scores are good but field data is poor, check real user devices and network conditions. Many issues appear only on low end phones.
+Test on a slow network profile to catch worst case behavior.
+Real users often browse on unstable networks, so this matters.
+Aim for consistent results, not just peak scores.
+Consistency builds user trust.
+Trust keeps visitors returning.
+Fast sites feel reliable.
 
-Teams follow budgets when they are easy to measure and tied to release criteria.
+## Related reading
 
-Audit Third Party Scripts
+- [Next.js SEO and Metadata in the App Router](/blog/nextjs-seo-metadata-app-router)
+- [Next.js Data Fetching Strategies](/blog/nextjs-data-fetching-strategies)
+- [CSS Architecture for Scalable Frontend](/blog/css-architecture-scalable-frontend)
 
-Marketing and analytics scripts can quietly hurt performance. Review them quarterly:
+## Last updated
 
-- Remove scripts that do not have clear value
-- Load third party tags after interaction if possible
-- Prefer lightweight alternatives
+2026-01-22
 
-Even one removed script can improve INP and LCP.
+## Sources
 
-Optimize Images and Fonts
+- https://web.dev/vitals/
+- https://developer.chrome.com/docs/web-platform/metrics/
 
-Images and fonts are the biggest assets on most pages:
+## Author
 
-- Use responsive images with `srcset`
-- Compress and serve modern formats
-- Limit font families and weights
-- Preload the fonts that are used above the fold
-
-Fewer font files often means faster rendering and lower CLS.
-
-Image Loading Strategy
-
-Make sure the most important image loads early. For hero images, use a higher priority and avoid lazy loading. For below the fold content, lazy loading saves bandwidth and improves LCP.
-
-Keep the image dimensions explicit so the browser can reserve space before the image downloads.
-
-Resource Hints That Help
-
-Use preload for the assets that are critical to the first render, especially the hero image and main font file. Use preconnect for third party domains that are required early.
-
-Avoid preloading too much, it can backfire by delaying the main content.
-
-Reduce Rendering Work
-
-Even when assets are fast, rendering can be slow. Keep the DOM light and avoid heavy above the fold components.
-
-Strategies:
-
-- Remove unused components from the initial render
-- Use `content-visibility` for long pages
-- Simplify layouts that force deep nesting
-
-Less work for the browser often improves both LCP and INP.
-
-Cache and Reuse
-
-Caching helps both speed and stability:
-
-- Use a CDN for static assets
-- Add long cache headers to versioned files
-- Reduce server response time for HTML
-
-A faster server response boosts LCP and reduces the chance of late layout shifts.
-
-Reduce JavaScript on the Critical Path
-
-Large bundles delay rendering and block interaction. Split code by route, defer non essential widgets, and remove unused dependencies.
-
-Helpful practices:
-
-- Use dynamic imports for rarely used UI
-- Keep analytics and chat widgets off the critical path
-- Audit bundles to remove duplicate libraries
-
-Less JavaScript makes both LCP and INP easier to hit.
-
-Monitor Over Time
-
-Performance can regress as the product grows. Set up a simple dashboard and watch the metrics weekly.
-
-Look for trends:
-
-- A slow rise in LCP after a new design
-- INP spikes after adding a new widget
-- CLS changes after a new ad slot
-
-Catching regressions early saves time and keeps the team focused on user experience.
-
-Prioritize the Most Important Templates
-
-Not every page needs the same performance investment. Identify the top landing pages, blog posts, or checkout flows and focus on those first.
-
-Improvements on high traffic pages deliver the biggest impact and help stabilize your overall metrics.
-
-Release Checklist
-
-Before shipping a major update, run a quick checklist:
-
-- Verify LCP on key pages
-- Confirm CLS has not regressed
-- Review new third party scripts
-- Check mobile performance on mid range devices
-
-These checks prevent late surprises after launch.
-
-Conclusion
-
-Core Web Vitals improve when you focus on a few high impact changes: the hero content, input responsiveness, and stable layouts. Measure with real user data, set a budget, and keep third party scripts in check. With a consistent playbook, performance becomes a product feature instead of a last minute fix.
+I am Toseef, a frontend engineer who builds Angular, React, and Next.js apps for real products. I write practical guides based on work experience and common team pitfalls. If you want to collaborate, visit [About](/about) or [Contact](/contact).

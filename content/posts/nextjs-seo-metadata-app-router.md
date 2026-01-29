@@ -1,4 +1,4 @@
----
+﻿---
 title: "Next.js SEO and Metadata in the App Router"
 date: "2026-01-07"
 description: "A practical checklist for metadata, Open Graph, robots, and structured data in the Next.js App Router."
@@ -6,75 +6,54 @@ slug: "nextjs-seo-metadata-app-router"
 image: "/images/nextjs-metadata.png"
 ---
 
-Next.js SEO and Metadata in the App Router
+# Next.js SEO and Metadata in the App Router
 
-Search visibility in Next.js is mostly about content quality and clear metadata. The App Router makes metadata easy to colocate with each route, but you still need a plan for titles, descriptions, canonical URLs, and rich previews.
+If your content is good but search traffic is flat, metadata is often the missing piece. In the App Router, the right metadata setup gives every route a clean preview, a canonical URL, and consistent titles.
 
-In this guide you will learn:
+This guide shows the patterns I use for blogs and content sites.
 
-- The difference between `metadata` and `generateMetadata`
-- How to create unique titles and descriptions
-- How to configure Open Graph and Twitter cards
-- When to use canonical URLs and robots rules
-- How to add structured data without extra tooling
+## Static metadata for stable pages
 
-Start With the Metadata Export
+```ts
+import type { Metadata } from "next";
 
-The simplest pattern is a static export:
-
-export const metadata = {
+export const metadata: Metadata = {
   title: "Blog",
-  description: "Frontend articles and guides"
+  description: "Frontend articles and guides",
+  alternates: { canonical: "https://your-domain.com/blog" },
 };
+```
 
-This works for pages with stable content, like About or Contact. Keep titles and descriptions short and specific so search results are clear.
+## Dynamic metadata for blog posts
 
-Use `generateMetadata` for Dynamic Routes
+```ts
+import type { Metadata } from "next";
+import { getPostBySlug } from "@/lib/posts";
+import { getSiteUrl } from "@/lib/site";
 
-For blog posts, category pages, and product pages, the metadata should come from content. The App Router supports a `generateMetadata` function that runs on the server.
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = getPostBySlug(params.slug);
+  const siteUrl = getSiteUrl();
+  const url = `${siteUrl}/blog/${post.slug}`;
 
-Common uses:
+  return {
+    title: post.title,
+    description: post.description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      url,
+      images: post.image ? [{ url: `${siteUrl}${post.image}` }] : undefined,
+      type: "article",
+    },
+  };
+}
+```
 
-- Title from the post front matter
-- Description from the post summary
-- Open Graph image from the post hero
+## Open Graph and Twitter cards
 
-The goal is for every URL to have a unique and accurate preview.
-
-Metadata Defaults and Inheritance
-
-Metadata in the App Router can be defined at multiple levels. Child routes can extend or override the parent values. Set sensible defaults at the root layout, then customize at the page level.
-
-This approach keeps the site consistent and avoids missing titles when new pages are added.
-
-Static vs Dynamic Metadata
-
-Static metadata is fast and cacheable. Dynamic metadata is powerful but should be used only when the content changes by route.
-
-A good rule:
-
-- Use static metadata for About, Contact, and landing pages
-- Use `generateMetadata` for blog posts and dynamic detail pages
-
-This keeps the app simple while still producing accurate previews.
-
-Write Titles That Match Intent
-
-A good title reflects the page goal and the user intent. If a page is a tutorial, say that. If it is a checklist, say that. Avoid repeating the site name at the front of every title, it wastes space.
-
-A simple pattern:
-
-- Primary keyword or topic
-- Short benefit or angle
-- Optional site name at the end
-
-Craft Descriptions That Invite the Click
-
-Descriptions are not a ranking factor, but they control what people see. Write them like a summary, not like keywords. Aim for one or two sentences that describe the value of the page.
-
-Open Graph and Twitter Cards
-
-Social previews are part of SEO because they affect how your content is shared. Add Open Graph and Twitter metadata for pages you expect to be shared.
+Social previews are part of SEO because they affect click through rates.
 
 Key fields:
 
@@ -83,160 +62,174 @@ Key fields:
 - `openGraph.images`
 - `twitter.card`
 
-Use absolute URLs for images and a consistent image size so previews look clean across platforms.
+Use consistent image sizes so previews look clean across platforms.
 
-Image Strategy for Social Previews
+## Canonical URLs and duplicates
 
-Pick a consistent aspect ratio and use it everywhere. Avoid tiny images or text that becomes unreadable when shared.
+If the same content can appear at multiple URLs, you need a canonical URL to prevent duplicate content signals.
 
-Useful habits:
+```ts
+alternates: { canonical: url }
+```
 
-- Keep text short and large
-- Use high contrast and clear branding
-- Optimize file size so previews load quickly
+For example, if you allow `/blog/post?ref=twitter`, the canonical should still be `/blog/post`.
 
-This improves both shareability and perceived quality.
+## Robots rules for low value pages
 
-Canonical URLs
+Do not index pages that add no value for search users. Common examples:
 
-If the same content can appear at multiple URLs, use a canonical URL to tell search engines which one is primary. This is common for filtered pages and marketing variants.
+- Internal search results
+- Account pages
+- Staging or preview routes
 
-A safe default is to set the canonical to the current URL for content pages and avoid duplicate routes that only change tracking parameters.
+In the App Router you can set robots metadata per route.
 
-URL Consistency
+## Sitemap and robots.txt
 
-Decide early on trailing slashes, lowercase slugs, and www vs non www. Inconsistent URLs create accidental duplicates.
+Keep your sitemap accurate and always reference it in `robots.txt`.
 
-Once you pick a convention, enforce it with redirects and keep it stable. This makes analytics and indexing more reliable.
+If you add new posts, regenerate the sitemap so search engines can discover them quickly.
 
-Robots Rules
+## Robots metadata examples
 
-Use robots rules to keep low value or duplicate pages out of search. Examples:
+For pages you do not want indexed, set `noindex`.
 
-- Do not index internal search results
-- Do not index staging routes
-- Use `noindex` for login and account pages
+```ts
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+```
 
-Keep public content pages indexable by default.
+For public content, keep indexing enabled.
 
-Robots Meta Tags and Headers
+## Open Graph image sizing
 
-Robots directives can also be set per page. This is useful for temporary campaigns, gated content, or short lived pages that should not be indexed.
+Use a consistent size across pages (for example 1200x630). Small images can look blurry in social previews, and mismatched sizes look unprofessional.
 
-Use `noindex, nofollow` for pages that are not meant for search. Keep a simple default so you do not accidentally block important routes.
+## Consistency checklist
 
-Structured Data for Rich Results
+- Every page has a unique title
+- Description matches the content
+- Canonical URL is correct
+- Open Graph image is present for shareable pages
 
-Structured data helps search engines understand your content. For blog posts, add JSON-LD with fields like headline, author, datePublished, and image.
+## Metadata inheritance
 
-You can inject a JSON-LD script in the page component. The content should match the visible page content, not a separate marketing copy.
+Metadata can be defined at the layout level and overridden in nested routes. This prevents missing titles and descriptions when you add new pages.
 
-Structured Data That Matches the Page
+Example:
 
-Structured data should describe what is actually visible. If the page is a tutorial, use an Article or HowTo schema. If it is a product page, use Product schema.
+- Root layout defines the site title template
+- Page level metadata overrides the title for specific routes
 
-Avoid adding fields that are not present on the page. Consistency builds trust with search engines and reduces rich result errors.
+This keeps the site consistent while still allowing unique pages.
 
-Lightweight JSON-LD Example
+## Duplicate content examples
 
-For blog posts, a minimal JSON-LD structure might include:
+Common duplicates include:
 
-- `headline`
-- `datePublished`
-- `author`
-- `image`
-- `mainEntityOfPage`
+- Tracking parameters in URLs
+- Multiple filters pointing to the same content
+- Both `/blog/post` and `/blog/post/` indexing
 
-Keep the schema small and accurate rather than trying to include every optional field.
+Use canonical URLs and consistent routing rules to avoid these issues.
 
-Sitemaps and Robots.txt
+## Schema types beyond Article
 
-Next.js can generate a sitemap and robots file. Make sure the sitemap includes all public pages, including blog posts. Keep robots.txt simple and do not block assets like CSS or images.
+Depending on the page, other schema types may be more accurate:
 
-404s, Redirects, and Link Health
+- `Organization` for home pages
+- `FAQPage` for FAQ content
+- `BreadcrumbList` for hierarchical navigation
 
-Broken links create a poor crawl experience. Keep a small redirect list when slugs change, and fix internal links quickly.
+Use the schema that best matches the content to improve rich results.
 
-Helpful practices:
+## Social preview checklist
 
-- Use 301 redirects for changed slugs
-- Avoid deleting pages without a replacement
-- Monitor for 404 spikes after releases
+- Use a 1200x630 Open Graph image
+- Keep text large and minimal
+- Make sure the image URL is absolute
 
-Internal Linking and URL Structure
+These small details increase share click through rates.
 
-Search engines rely on internal links to understand your site structure. Use consistent, readable slugs and link related content together.
+## Pagination and tag pages
 
-Practical tips:
+Paginated or tag filtered pages often repeat content. Consider noindexing these if they do not add unique value, and keep the canonical pointed to the main category page.
 
-- Link from blog posts to relevant guides or categories
-- Keep URLs short and descriptive
-- Avoid changing slugs after publishing unless you add redirects
+## Monitor in Search Console
 
-Strong internal links help search engines discover pages and help users navigate.
+After changes, watch Google Search Console for coverage and enhancement reports. It helps you spot indexing issues early and confirms that metadata and structured data are recognized.
 
-Topic Clusters and Related Content
+## Internal linking
 
-Group related posts into a topic cluster. Link from a core guide to supporting articles, and link back to the guide from each related post.
+Metadata helps discovery, but internal links help crawlers understand your site. Link related posts together and include a clear site navigation so important pages are not buried.
 
-This strengthens topical relevance and keeps readers moving through the site.
+## Default Open Graph settings
 
-Pagination, Tags, and Archives
+Define default Open Graph settings in the root layout, then override per page. This prevents missing previews when new pages are added.
+Keep defaults simple and accurate so they do not conflict with page specific metadata.
+This approach also reduces duplicated tags across the app.
+Consistency in metadata improves trust in search previews.
 
-If you use paginated lists or tag pages, make sure they have unique metadata and a clear purpose. Thin tag pages can look like low quality content, so add short descriptions and curated lists rather than auto generated dumps.
+## Titles and descriptions that work
 
-For pagination:
+I aim for this pattern:
 
-- Keep the main page canonical
-- Use clean URLs for page numbers
-- Avoid indexing empty or duplicate pages
+- Primary keyword or topic
+- Short benefit or outcome
+- Optional site name at the end
 
-RSS and Feeds
+Example:
 
-If your blog has an RSS feed, make sure it is discoverable. Link it in the site header or footer and keep it updated when new posts are published.
+`React State Management: Practical Patterns | DevCraft`
 
-Feeds are useful for readers and they can also help search engines discover new content quickly.
+## Testing and debugging previews
 
-Performance and Core Web Vitals
+Use these tools to confirm previews:
 
-Fast pages are easier to crawl and feel better to users. Images, fonts, and third party scripts are the common culprits. Optimize these assets and keep the critical content visible quickly.
+- Facebook Sharing Debugger for Open Graph
+- Twitter Card Validator for Twitter cards
+- Google Rich Results Test for structured data
 
-SEO and performance are linked. If your pages are slow, search visibility often suffers.
+If the preview is wrong, check for cached data and try again after a few minutes.
 
-Content Quality and Relevance
+## JSON-LD for articles
 
-Search engines prioritize helpful, specific content. Make sure each page has a clear purpose, a defined audience, and original value.
+Structured data helps search engines understand your content.
 
-Avoid duplicate posts that target the same keyword. Merge similar content and keep the best version up to date.
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Next.js SEO and Metadata in the App Router",
+  "author": { "@type": "Person", "name": "Toseef" }
+}
+</script>
+```
 
-Internationalization and Hreflang
+## Common mistakes
 
-If the site has multiple languages, add hreflang links so search engines know which version to serve. Each language should link to every other language variant.
+- Reusing the same title and description everywhere
+- Missing canonical URLs on dynamic routes
+- Forgetting Open Graph images
+- Using relative URLs in metadata
 
-Keep the translations aligned in structure and metadata to avoid index gaps between locales.
+## Related reading
 
-Drafts and Preview Content
+- [Core Web Vitals Playbook](/blog/core-web-vitals-playbook)
+- [Next.js App Router Fundamentals](/blog/nextjs-app-router-fundamentals)
+- [Next.js Data Fetching Strategies](/blog/nextjs-data-fetching-strategies)
 
-Draft posts and preview builds should not be indexed. Use a robots rule or a `noindex` directive on preview routes and staging environments.
+## Last updated
 
-This prevents half finished content from appearing in search results.
+2026-01-22
 
-Monitor Search Console
+## Sources
 
-Search Console is the best place to spot indexing issues, crawl errors, and rich results problems. Review it regularly and fix issues early.
+- https://nextjs.org/docs/app/building-your-application/optimizing/metadata
+- https://schema.org/Article
 
-Consistent monitoring prevents small metadata mistakes from turning into long term visibility loss.
+## Author
 
-Test and Validate
-
-Always validate what search engines see. Check:
-
-- Page source for correct meta tags
-- Open Graph previews in a sharing debugger
-- Rich results with a schema validator
-
-Fixing these early saves time and keeps previews consistent across platforms.
-
-Conclusion
-
-The App Router gives you all the tools you need for SEO, but it is still your job to define clear titles, descriptions, and previews for every page. Start with static metadata, move to `generateMetadata` where content is dynamic, and keep structured data aligned with the page content. The result is clean previews, fewer duplicates, and a site that is easier to discover.
+I am Toseef, a frontend engineer who builds Angular, React, and Next.js apps for real products. I write practical guides based on work experience and common team pitfalls. If you want to collaborate, visit [About](/about) or [Contact](/contact).
